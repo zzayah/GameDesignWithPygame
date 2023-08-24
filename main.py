@@ -73,3 +73,14 @@ while start:
                 else:
                     break
 
+        if gameboardMod == ["X", "X", "X", "X", "X", "X"]:
+            print[f"{current_player} won the ROUND! All other players owe them 1 chip!"]
+
+            for player in name_list:
+                if player.chips == 1:
+                    print(f"{current_player} ran out of chips! they are out!")
+                    name_list.remove(player)
+                    if name_list.len() == 1:
+                        print(f"{name_list[0]} won the whole GAME!")
+                        start = False
+            start = False

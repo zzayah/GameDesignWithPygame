@@ -28,19 +28,16 @@ class Player:
 name_list = []
 
 # game environment
-gameboard = [1, 2, 3, 4, 5, 6]
 gameboardMod = ["O", "O", "O", "O", "O", "O"]
-current_space = 1
-found_match = False
-start_turn_init = True
+start = True
 
 # game conditions
 start = True
 
 
 # die
-def roll_die(self):
-    return [random.randomint(1, 6) for _ in range(6)]
+def roll_die():
+    return [random.randint(1, 6) for _ in range(6)]
 
 
 num_players = int(input("How many people are playing (1-4)?"))
@@ -52,35 +49,49 @@ for index in range(num_players):
 
 print(name_list)
 
+
 while start:
     for player_index in range(len(name_list)):
         current_player = name_list[player_index]
         input(f"{current_player.name}, press Enter to roll the die")
-        dice = roll_die().sort()
+        dice = sorted(roll_die())
 
         print(f"{current_player.name} rolled {dice}")
 
-        placed_die = []
+        found_match = False
 
-        for board_index in gameboard:
-            for roll_index in dice:
-                if dice[roll_index] == 1 and gameboardMod[0] == "O":
+        for board_XO in gameboardMod:
+            space_one_passed = False
+            for dice_value in dice:
+                if dice_value == 1 and gameboardMod[0] == "O" and board_XO == "O" and not space_one_passed:
                     found_match = True
-                    gameboardMod[board_index] = "X"
-                elif dice[roll_index] == gameboard[board_index] and board_index > 0 and gameboardMod[board_index-1] == "X":
+                    gameboardMod[0] = "X"
+
+                    current_player.remove_chips(1)
+                    space_one_passed = True
+
+                    print(f"{current_player.name} placed a 1 on the board.")
+                elif dice_value == gameboardMod.index(board_XO) and gameboardMod[gameboardMod.index(board_XO) - 1] == "X":
                     found_match = True
-                    gameboardMod[board_index] = "X"
+                    current_player.remove_chips(1)
+                    gameboardMod[gameboardMod.index(board_XO)] = "X"
+                    print(f"{current_player.name} placed a {dice_value} on the board.")
                 else:
                     break
 
-        if gameboardMod == ["X", "X", "X", "X", "X", "X"]:
-            print[f"{current_player} won the ROUND! All other players owe them 1 chip!"]
+        if all(status == "X" for status in gameboardMod):
+            print(f"{current_player.name} won the ROUND! All other players owe them 1 chip!")
 
             for player in name_list:
                 if player.chips == 1:
-                    print(f"{current_player} ran out of chips! they are out!")
+                    print(f"{player.name} ran out of chips! They are out!")
                     name_list.remove(player)
-                    if name_list.len() == 1:
-                        print(f"{name_list[0]} won the whole GAME!")
+                    if len(name_list) == 1:
+                        print(f"{name_list[0].name} won the whole GAME!")
                         start = False
-            start = False
+
+        print(f"Gameboard: {gameboardMod}")
+        print(f"Player chips:")
+        for player in name_list:
+            print(f"{player.name}: {player.chips} chips")
+        input("Press Enter to continue to the next player...")

@@ -28,6 +28,7 @@ class Player:
 name_list = []
 
 # game environment
+gameboard = [1, 2, 3, 4, 5, 6]
 gameboardMod = ["O", "O", "O", "O", "O", "O"]
 start = True
 
@@ -56,34 +57,65 @@ while start:
         input(f"{current_player.name}, press Enter to roll the die")
         dice = sorted(roll_die())
 
+        # for computational purposes
+        # Create a list to store duplicate values for comparison
+        duplicate_values = []
+        comp_dice = dice.copy()
+            
+        for value_to_check in range(1, 7):
+            count_of_value = comp_dice.count(value_to_check)
+                
+            if count_of_value > 1:
+                duplicate_values.extend([value_to_check] * count_of_value)
+                    
+                times_to_remove = count_of_value - 1
+                for _ in range(times_to_remove):
+                    comp_dice.remove(value_to_check)
+
         print(f"{current_player.name} rolled {dice}")
+        print(comp_dice)
 
         found_match = False
+        space_one_passed = False
+        chips_to_remove = 0
 
-        for board_XO in gameboardMod:
-            space_one_passed = False
-            for dice_value in dice:
-                if dice_value == 1 and gameboardMod[0] == "O" and board_XO == "O" and not space_one_passed:
+        iterations = 0
+
+        for current_XO_val in gameboardMod:
+            for current_dice_val in comp_dice:
+
+                # Case 1
+                if not space_one_passed and current_dice_val == 1:
+                    space_one_passed = True
                     found_match = True
                     gameboardMod[0] = "X"
-
-                    current_player.remove_chips(1)
-                    space_one_passed = True
-
-                    print(f"{current_player.name} placed a 1 on the board.")
-                elif dice_value == gameboardMod.index(board_XO) and gameboardMod[gameboardMod.index(board_XO) - 1] == "X":
-                    found_match = True
-                    current_player.remove_chips(1)
-                    gameboardMod[gameboardMod.index(board_XO)] = "X"
-                    print(f"{current_player.name} placed a {dice_value} on the board.")
-                else:
+                    chips_to_remove += 1
+                    print("Removed 1 chip (Case 1))")
                     break
+                # Case 2
+                elif space_one_passed and current_XO_val == "O" and gameboardMod[iterations - 1] == "X" and gameboardMod.index("O") == current_dice_val - 1:
+                    found_match = True
+                    gameboardMod[0] = "O"
+                    chips_to_remove += 1
+                    print("Removed 1 chip (Case 2)")
+                    break
+                elif not found_match:
+                    chips_owed = gameboardMod.count("O")
+                    print("No matches found")
+                    print("{current_player.name} owes {chips_owed} chips")
+                    break
+
+                iterations += 1
+
+
+                # reset
+        space_one_passed = False
 
         if all(status == "X" for status in gameboardMod):
             print(f"{current_player.name} won the ROUND! All other players owe them 1 chip!")
 
             for player in name_list:
-                if player.chips == 1:
+                if player.chips == 0:
                     print(f"{player.name} ran out of chips! They are out!")
                     name_list.remove(player)
                     if len(name_list) == 1:

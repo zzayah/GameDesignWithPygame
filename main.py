@@ -11,9 +11,8 @@ pygame.init()
 beginner_grid = [10, 10, 40]
 intermediate_grid = [16, 16, 40]
 advanced_grid = [30, 16, 99]
+tile_size = 16
 
-tile_size = 16  # Size of each tile in pixels
-grid_size = 20   # Size of the grid
 screen_width = 300
 screen_height = 372.5
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -53,16 +52,25 @@ while True:
                 selected_difficulty = 2
 
     if selected_difficulty == 0:
-        screen_width = beginner_grid[0] * tile_size
-        screen_height = beginner_grid[1] * tile_size
+        rows, cols, mines = beginner_grid
+        game_board = [[0 for _ in range(cols)] for _ in range(rows)]
+
+        # Draw the game board
+        screen.fill(WHITE)
+
+        if game_board:
+            for i in range(rows):
+                for j in range(cols):
+                    x_pos = j * tile_size
+                    y_pos = i * tile_size
+                    screen.blit(grey_tile.surface(), (x_pos, y_pos))
+    elif selected_difficulty == 1:
+        rows, cols, mines = intermediate_grid
+        screen.fill(WHITE)
         # blit gameboard
     elif selected_difficulty == 1:
-        screen_width = intermediate_grid[0] * tile_size
-        screen_height = intermediate_grid[1] * tile_size
-        # blit gameboard
-    elif selected_difficulty == 1:
-        screen_width = advanced_grid[0] * tile_size
-        screen_height = advanced_grid[1] * tile_size
+        rows, cols, mines = advanced_grid
+        screen.fill(WHITE)
         # blit gameboard
 
     # Draw the difficulty boxes

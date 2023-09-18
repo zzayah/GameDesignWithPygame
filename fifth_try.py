@@ -60,3 +60,4 @@ class Board:
             else:
                 print(finishstrike[i], end=" ")
         print()
+        

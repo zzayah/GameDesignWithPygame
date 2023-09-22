@@ -1,5 +1,6 @@
 from game import Game
-board = None
-screenSize = (800, 800)
+from board import Board
+board = Board((9, 9))
+screenSize = (board.getSize()[0]*16, board.getSize()[1]*16)
 game = Game(board, screenSize)
 game.run()

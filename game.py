@@ -53,6 +53,11 @@ class Game():
                 topLeft = topLeft[0] + self.pieceSize, topLeft[1]
             topLeft = 0, topLeft [1] + self.pieceSize
 
+    def getImage(self):
+        string = None
+
+        return self.images[string]
+
 
 
 

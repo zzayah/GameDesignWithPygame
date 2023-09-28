@@ -32,8 +32,6 @@ def load_sprite(pic_number):
 
     return sprite
 
-
-
 class Game():
     def __init__(self, board, screenSize):
         self.board = board
@@ -46,10 +44,11 @@ class Game():
         self.screen = pygame.display.set_mode(self.screenSize)
         pygame.display.set_caption("Minesweeper")
         running = True
+
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    running = False
+                    pygame.quit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
                     rightClick = pygame.mouse.get_pressed()[2]
@@ -57,36 +56,21 @@ class Game():
                     self.handleClick(position, rightClick)
             self.draw()
             pygame.display.flip()
-            if self.board.getWon() and not self.sound_played:
-                self.board.getStatusRevert()
-                sound = pygame.mixer.Sound("win.wav")
-                sound.play()
-                self.sound_played = True  # Set sound_played to True
-                sleep(4)
-                
-            elif self.board.getLost() and not self.sound_played:
-                self.board.getStatusRevert()
-                sound = pygame.mixer.Sound("lose.wav")
-                sound.play()
-                self.sound_played = True  # Set sound_played to True
-                sleep(4)
-
-        pygame.quit()
 
     def draw(self):
-        topLeft = (0, 0)
-        # GREY_LIGHT = (192, 192, 192)
-        # GREY_DARK = (128, 128, 128)
-        # grey_surf = pygame.Surface(self.screenSize)
-        # grey_surf.fill(GREY_DARK)
-        # self.screen.blit(grey_surf, (0, 0))
+        topLeft = (50, 50)
+        GREY_LIGHT = (192, 192, 192)
+        GREY_DARK = (128, 128, 128)
+        grey_surf = pygame.Surface(self.screenSize)
+        grey_surf.fill(GREY_DARK)
+        self.screen.blit(grey_surf, (0, 0))
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
                 piece = self.board.getPiece((row, col))
                 image = self.getImage(piece)
                 self.screen.blit(image, topLeft)
                 topLeft = topLeft[0] + self.pieceSize, topLeft[1]
-            topLeft = 0, topLeft[1] + self.pieceSize
+            topLeft = 50, topLeft[1] + self.pieceSize
 
     def getImage(self, piece):
 
@@ -106,6 +90,9 @@ class Game():
     def handleClick(self, position, rightClick):
         if self.board.lost:
             return
-        index = position[1] // self.pieceSize, position[0] // self.pieceSize
+        index = (position[1] - 50) // self.pieceSize, (position[0] - 50) // self.pieceSize
+        print(position[1])
+        print(position[0])
+        print(index)
         piece = self.board.getPiece(index)
         self.board.handleClick(piece, rightClick)

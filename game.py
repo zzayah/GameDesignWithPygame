@@ -39,6 +39,7 @@ class Game():
         self.board = board
         self.screenSize = screenSize
         self.pieceSize = 16
+        self.sound_played = False  # Track if sound has been played
 
     def run(self):
         pygame.init()
@@ -56,13 +57,18 @@ class Game():
                     self.handleClick(position, rightClick)
             self.draw()
             pygame.display.flip()
-            if self.board.getWon():
+            if self.board.getWon() and not self.sound_played:
+                self.board.getStatusRevert()
                 sound = pygame.mixer.Sound("win.wav")
                 sound.play()
+                self.sound_played = True  # Set sound_played to True
                 sleep(4)
-            elif self.board.getLost():
+                
+            elif self.board.getLost() and not self.sound_played:
+                self.board.getStatusRevert()
                 sound = pygame.mixer.Sound("lose.wav")
                 sound.play()
+                self.sound_played = True  # Set sound_played to True
                 sleep(4)
 
         pygame.quit()

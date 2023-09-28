@@ -69,3 +69,7 @@ class Board:
         
     def getWon(self):
         return self.numNonBombs == self.numClicked
+    
+    def getStatusRevert(self):
+        self.lost = False
+        self.won = False

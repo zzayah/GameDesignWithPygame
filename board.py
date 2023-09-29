@@ -65,7 +65,6 @@ class Board:
                 self.handleClick(neighbor, False)
         
     def handleClickGameDisabled(self, position):
-        if self.smileRect.collidepoint(position):
             self.setBoard()
             self.lost = False
             self.won = False

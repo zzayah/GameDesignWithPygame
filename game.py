@@ -1,6 +1,7 @@
 import pygame
 from time import sleep
 
+
 def load_sprite(pic_number):
     # Define the dimensions of each sprite in the grid
     sprite_width, sprite_height = 16, 16
@@ -28,9 +29,11 @@ def load_sprite(pic_number):
     image_end_x = min(max(image_end_x, 0), image_width)
     image_end_y = min(max(image_end_y, 0), image_height)
 
-    sprite = image.subsurface(pygame.Rect(image_start_x, image_start_y, image_end_x - image_start_x, image_end_y - image_start_y))
+    sprite = image.subsurface(
+        pygame.Rect(image_start_x, image_start_y, image_end_x - image_start_x, image_end_y - image_start_y))
 
     return sprite
+
 
 class Game():
     def __init__(self, board, screenSize):
@@ -38,8 +41,9 @@ class Game():
         self.screenSize = screenSize
         self.pieceSize = 16
         self.sound_played = False  # Track if sound has been played
-        self.smileRect = pygame.Rect((self.screenSize[0] // 2) - 16, 10, 32, 32)
+        self.smile_rect = pygame.Rect((self.screenSize[0] // 2) - 16, 10, 32, 32)  # Use pygame.Rect
         self.gameEnabled = True
+        self.smile_status = "smile"
 
     def run(self):
         pygame.init()
@@ -53,15 +57,11 @@ class Game():
                     running = False
                     pygame.quit()
 
-                if self.gameEnabled:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        position = pygame.mouse.get_pos()
-                        rightClick = pygame.mouse.get_pressed()[2]
-                        self.handleClick(position, rightClick)
-                else:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        position = pygame.mouse.get_pos()
-                        self.handleClickGameDisabled(position)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    position = pygame.mouse.get_pos()
+                    rightClick = pygame.mouse.get_pressed()[2]
+                    self.handleClick(position, rightClick)
+
             self.draw()
             pygame.display.flip()
         pygame.quit()
@@ -74,16 +74,16 @@ class Game():
         grey_surf.fill(GREY_DARK)
         self.screen.blit(grey_surf, (0, 0))
 
-        if not (self.board.lost and self.board.won):
-            smile_status = "smile"
-        elif not self.board.won or self.board.lost:
-            smile_status = "dead_face"
+        if not (self.board.lost):
+            self.smile_status = "smile"
+        else:
+            self.smile_status = "dead_face"
 
-        pygame.draw.rect(self.screen, GREY_LIGHT, self.smileRect, 1)
-
-        smile = pygame.image.load(f"{smile_status}.png")
+        smile = pygame.image.load(f"{self.smile_status}.png")
         smile = pygame.transform.scale(smile, (32, 32))
         self.screen.blit(smile, ((self.screenSize[0] // 2) - 16, 10))
+
+        pygame.draw.rect(self.screen, GREY_LIGHT, self.smile_rect, 1)  # Use pygame.Rect
 
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
@@ -97,35 +97,40 @@ class Game():
 
         if piece.getFlagged() and not piece.getClicked():
             return load_sprite(2)
-        
+
         if piece.getClicked():
             if piece.getHasBomb():
                 return load_sprite(6)
             elif piece.getNumAround() == 0:
                 return load_sprite(1)
             elif piece.getNumAround() > 0:
-                return load_sprite(piece.getNumAround()+7)
-            
+                return load_sprite(piece.getNumAround() + 7)
+
         return load_sprite(0)
-        
+
     def handleClick(self, position, rightClick):
-        if self.board.lost:
+        if self.board.lost and self.smile_rect.collidepoint(position):
+            self.board.handleClickGameDisabled(position)
+            # reset all instances of the game class
+            self.sound_played = False
+            self.gameEnabled = True
+
             return
+        elif self.board.lost:
+            return
+
         index = (position[1] - 50) // self.pieceSize, (position[0] - 50) // self.pieceSize
         print(position[1])
         print(position[0])
         print(index)
-    
-        if index[0] < 0 or index[0] >= self.board.getSize()[0] or index[1] < 0 or index[1] >= self.board.getSize()[1]:
+
+        if self.smile_rect.collidepoint(position):  # Use pygame.Rect
+            self.board.handleClickGameDisabled(position)
+            # reset all instances of the game class
+            self.sound_played = False
+            self.gameEnabled = True
+        elif index[0] < 0 or index[0] >= self.board.getSize()[0] or index[1] < 0 or index[1] >= self.board.getSize()[1]:
             return
         else:
             piece = self.board.getPiece(index)
             self.board.handleClick(piece, rightClick)
-
-    def handleClickGameDisabled(self, position):
-        if self.smileRect.collidepoint(position):
-            self.board.handleClickGameDisabled(position)
-            # reset all instances of game class
-            self.sound_played = False
-            self.gameEnabled = True
-

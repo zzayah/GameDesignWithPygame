@@ -64,6 +64,16 @@ class Board:
             if not neighbor.getHasBomb() and not neighbor.getClicked():
                 self.handleClick(neighbor, False)
         
+    def handleClickGameDisabled(self, position):
+        if self.smileRect.collidepoint(position):
+            self.setBoard()
+            self.lost = False
+            self.won = False
+            self.numClicked = 0
+            self.numNonBombs = 0
+            self.sound_played = False
+            self.gameEnabled = True
+        
     def getLost(self):
         return self.lost
         

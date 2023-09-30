@@ -48,7 +48,17 @@ class Board:
         return self.board[index[0]][index[1]]
     
     def handleClick(self, piece, rightClick):
-        if rightClick:
+
+        flags_around = sum(1 for neighbor in piece.getNeighbors() if neighbor.getFlagged())
+
+
+        if piece.getClicked():
+            print(piece.getClicked())
+            if flags_around == piece.getNumAround():
+                for neighbor in piece.getNeighbors():
+                    if not neighbor.getClicked() and not neighbor.getFlagged():
+                        self.handleClick(neighbor, False)
+        elif rightClick:
             piece.toggleFlag()
             return
         if piece.getFlagged():
@@ -64,7 +74,7 @@ class Board:
             if not neighbor.getHasBomb() and not neighbor.getClicked():
                 self.handleClick(neighbor, False)
         
-    def handleClickGameDisabled(self, position):
+    def handleClickGameDisabled(self):
             self.setBoard()
             self.lost = False
             self.won = False

@@ -3,7 +3,18 @@ import threading
 import time
 import math
 
+
 def load_sprite(pic_number, imgName):
+    """
+    Load and extract a sprite from an image file based on pic_number and imgName.
+
+    Args:
+        pic_number (int): The index of the sprite to extract.
+        imgName (str): The name of the image file.
+
+    Returns:
+        pygame.Surface: The extracted sprite.
+    """
     # Define the dimensions of each sprite in the grid
     if imgName == "2000":
         sprite_width, sprite_height = 16, 16
@@ -38,8 +49,16 @@ def load_sprite(pic_number, imgName):
 
     return sprite
 
+
 class Game():
     def __init__(self, board, screenSize):
+        """
+        Initialize the Minesweeper game.
+
+        Args:
+            board (Board): The game board.
+            screenSize (tuple): The size of the game window.
+        """
         self.board = board
         self.screenSize = screenSize
         self.pieceSize = 16
@@ -53,6 +72,9 @@ class Game():
         self.firstClick = True
 
     def run(self):
+        """
+        Run the Minesweeper game loop.
+        """
         pygame.init()
         self.screen = pygame.display.set_mode(self.screenSize)
         pygame.display.set_caption("Minesweeper")
@@ -68,7 +90,7 @@ class Game():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
                     rightClick = pygame.mouse.get_pressed()[2]
-                    
+
                     if first_click:  # Check if this is the first click
                         pygame.time.set_timer(pygame.USEREVENT, self.clock_update_time)
                         first_click = False  # Set first_click to False after the first click
@@ -82,8 +104,10 @@ class Game():
             pygame.display.flip()
         pygame.quit()
 
-
     def updateClock(self):
+        """
+        Update the in-game clock.
+        """
         now = pygame.time.get_ticks()
         if now - self.last_clock_update >= 1000:  # Update only once every second
             self.clock = (self.clock[0], self.clock[1], self.clock[2] + 1)
@@ -100,6 +124,9 @@ class Game():
             self.last_clock_update = now
 
     def draw(self):
+        """
+        Draw the game interface.
+        """
         topLeft = (50, 50)
         GREY_LIGHT = (192, 192, 192)
         GREY_DARK = (128, 128, 128)
@@ -119,7 +146,9 @@ class Game():
         pygame.draw.rect(self.screen, GREY_LIGHT, self.smile_rect, 1)
 
         # Corrected the updateClock placement - only update once per frame
-        self.updateClock()
+        if not self.firstClick:
+            self.updateClock()
+
         third = load_sprite(self.clock[2], "2000clock")
         second = load_sprite(self.clock[1], "2000clock")
         first = load_sprite(self.clock[0], "2000clock")
@@ -137,6 +166,15 @@ class Game():
             topLeft = 50, topLeft[1] + self.pieceSize
 
     def getImage(self, piece):
+        """
+        Get the image for a game piece.
+
+        Args:
+            piece (Piece): The game piece.
+
+        Returns:
+            pygame.Surface: The image of the game piece.
+        """
         if piece.getFlagged() and not piece.getClicked():
             return load_sprite(2, "2000")
 
@@ -151,13 +189,18 @@ class Game():
         return load_sprite(0, "2000")
 
     def handleClick(self, position, rightClick):
+        """
+        Handle mouse clicks on the game board.
 
+        Args:
+            position (tuple): The position of the mouse click.
+            rightClick (bool): True if it's a right-click, False otherwise.
+        """
         if self.firstClick:
-
             pygame.time.set_timer(pygame.USEREVENT, self.clock_update_time)  # Set up a custom event for clock updates
 
             self.first_click = False
-            self.board.setBoard(position)
+            self.board.setBoard()
             self.board.lost = False
             self.board.won = False
             self.board.numClicked = 0
@@ -165,7 +208,6 @@ class Game():
             self.gameEnabled = True
             self.clock = (0, 0, 0)
             return
-
 
         if self.board.lost and self.smile_rect.collidepoint(position):
             self.board.handleClickGameDisabled()

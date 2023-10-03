@@ -10,18 +10,24 @@ class Board:
         self.numNonBombs = 0
         self.setBoard()
 
+        self.numBombs = 0
+
     def setBoard(self):
         self.board = []
         for row in range(self.size[0]):
             row = []
             for col in range(self.size[1]):
                 hasBomb = random() < self.prob
+                self.numBombs += 1
                 if not hasBomb:
                     self.numNonBombs += 1
                 piece = Piece(hasBomb)
                 row.append(piece)
             self.board.append(row)
         self.setNeighbors()
+
+    def getTotalBombs(self):
+        return self.numBombs
 
     def setNeighbors(self):
         for row in range(self.size[0]):
@@ -75,14 +81,12 @@ class Board:
                 self.handleClick(neighbor, False)
         
     def handleClickGameDisabled(self):
-            self.setBoard()
-            self.lost = False
-            self.won = False
-            self.numClicked = 0
-            self.numNonBombs = 0
-            self.sound_played = False
-            self.gameEnabled = True
-        
+        self.setBoard()
+        self.lost = False
+        self.won = False
+        self.numClicked = 0
+        self.numNonBombs = 0
+
     def getLost(self):
         return self.lost
         

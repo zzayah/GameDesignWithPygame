@@ -91,10 +91,6 @@ class Game():
                     position = pygame.mouse.get_pos()
                     rightClick = pygame.mouse.get_pressed()[2]
 
-                    if first_click:  # Check if this is the first click
-                        pygame.time.set_timer(pygame.USEREVENT, self.clock_update_time)
-                        first_click = False  # Set first_click to False after the first click
-
                     self.handleClick(position, rightClick)
 
                 if event.type == pygame.USEREVENT:
@@ -148,14 +144,23 @@ class Game():
         # Corrected the updateClock placement - only update once per frame
         if not self.firstClick:
             self.updateClock()
+            self.firstClick = False
 
-        third = load_sprite(self.clock[2], "2000clock")
-        second = load_sprite(self.clock[1], "2000clock")
-        first = load_sprite(self.clock[0], "2000clock")
+        if not self.board.lost and not self.firstClick:
+            third = load_sprite(self.clock[2], "2000clock")
+            second = load_sprite(self.clock[1], "2000clock")
+            first = load_sprite(self.clock[0], "2000clock")
 
-        self.screen.blit(third, (self.screenSize[0] // 2 + 50, 10))
-        self.screen.blit(second, (self.screenSize[0] // 2 + 37, 10))
-        self.screen.blit(first, (self.screenSize[0] // 2 + 24, 10))
+            self.screen.blit(third, (self.screenSize[0] // 2 + 50, 10))
+            self.screen.blit(second, (self.screenSize[0] // 2 + 37, 10))
+            self.screen.blit(first, (self.screenSize[0] // 2 + 24, 10))
+        else:
+            zero = load_sprite(0, "2000clock")
+            self.screen.blit(zero, (self.screenSize[0] // 2 + 50, 10))
+            self.screen.blit(zero, (self.screenSize[0] // 2 + 37, 10))
+            self.screen.blit(zero, (self.screenSize[0] // 2 + 24, 10))
+
+
 
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
@@ -196,11 +201,16 @@ class Game():
             position (tuple): The position of the mouse click.
             rightClick (bool): True if it's a right-click, False otherwise.
         """
-        if self.firstClick:
+
+        index = ((position[1] - 50) // self.pieceSize, (position[0] - 50) // self.pieceSize)
+
+        if self.firstClick and not self.smile_rect.collidepoint(position):
             pygame.time.set_timer(pygame.USEREVENT, self.clock_update_time)  # Set up a custom event for clock updates
 
-            self.first_click = False
-            self.board.setBoard()
+            piece = self.board.getPiece(index)
+            self.board.handleClick(piece, rightClick)
+
+            self.firstClick = False
             self.board.lost = False
             self.board.won = False
             self.board.numClicked = 0
@@ -210,21 +220,28 @@ class Game():
             return
 
         if self.board.lost and self.smile_rect.collidepoint(position):
+            pygame.time.set_timer(pygame.USEREVENT, self.clock_update_time)  # Set up a custom event for clock updates
+
             self.board.handleClickGameDisabled()
+            self.board.lost = False
             self.sound_played = False
             self.gameEnabled = True
+
             self.firstClick = True
+
             self.clock = (0, 0, 0)
             return
         elif self.board.lost:
             return
 
-        index = ((position[1] - 50) // self.pieceSize, (position[0] - 50) // self.pieceSize)
-
         if self.smile_rect.collidepoint(position):
             self.board.handleClickGameDisabled()
+            self.board.lost = False
             self.sound_played = False
             self.gameEnabled = True
+
+            self.firstClick = True
+
             self.clock = (0, 0, 0)
         elif index[0] < 0 or index[0] >= self.board.getSize()[0] or index[1] < 0 or index[1] >= self.board.getSize()[1]:
             return

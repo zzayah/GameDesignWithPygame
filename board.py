@@ -9,22 +9,27 @@ class Board:
         self.numClicked = 0
         self.numNonBombs = 0
         self.setBoard()
-
-        self.numBombs = 0
+        self.bombAry = []
+        self.flagAry = []
+        self.curIndex = (0, 0)
 
     def setBoard(self):
         self.board = []
+        _bombAry = []
         for row in range(self.size[0]):
-            row = []
+            row_list = []
             for col in range(self.size[1]):
                 hasBomb = random() < self.prob
-                self.numBombs += 1
-                if not hasBomb:
+                if hasBomb:
+                    _bombAry.append(True)  # Add True to boardAry to indicate a bomb
+                else:
+                    _bombAry.append(False)  # Add False to boardAry to indicate no bomb
                     self.numNonBombs += 1
                 piece = Piece(hasBomb)
-                row.append(piece)
-            self.board.append(row)
+                row_list.append(piece)
+            self.board.append(row_list)
         self.setNeighbors()
+        self.bombAry = _bombAry
 
     def getTotalBombs(self):
         return self.numBombs
@@ -51,12 +56,12 @@ class Board:
         return self.size
 
     def getPiece(self, index):
+        self.curIndex = index[0], index[1]
         return self.board[index[0]][index[1]]
     
     def handleClick(self, piece, rightClick):
 
         flags_around = sum(1 for neighbor in piece.getNeighbors() if neighbor.getFlagged())
-
 
         if piece.getClicked():
             print(piece.getClicked())
@@ -66,7 +71,9 @@ class Board:
                         self.handleClick(neighbor, False)
         elif rightClick:
             piece.toggleFlag()
-            return
+            self.flagAry[(self.curIndex[0])(self.curIndex[1])] = True
+            return self.flagAry[(self.curIndex[0])(self.curIndex[1])]
+            # return
         if piece.getFlagged():
             return
         piece.click()

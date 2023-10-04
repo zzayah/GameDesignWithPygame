@@ -160,8 +160,6 @@ class Game():
             self.screen.blit(zero, (self.screenSize[0] // 2 + 37, 10))
             self.screen.blit(zero, (self.screenSize[0] // 2 + 24, 10))
 
-
-
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
                 piece = self.board.getPiece((row, col))
@@ -184,9 +182,7 @@ class Game():
             return load_sprite(2, "2000")
 
         if piece.getClicked():
-            if piece.getHasBomb():
-                return load_sprite(6, "2000")
-            elif piece.getNumAround() == 0:
+            if piece.getNumAround() == 0:
                 return load_sprite(1, "2000")
             elif piece.getNumAround() > 0:
                 return load_sprite(piece.getNumAround() + 7, "2000")
@@ -205,10 +201,21 @@ class Game():
         index = ((position[1] - 50) // self.pieceSize, (position[0] - 50) // self.pieceSize)
 
         if self.firstClick and not self.smile_rect.collidepoint(position):
+
+            # Generate a new random board until the first clicked cell and its neighbors are safe
+            while True:
+                self.board.resetBoard()
+                piece = self.board.getPiece(index)
+
+                # Check if the first clicked cell and its neighbors are safe
+                if not piece.getHasBomb() and all(
+                    not neighbor.getHasBomb() for neighbor in self.board.getListOfNeighbors(index)
+                ):
+                    break
+
             pygame.time.set_timer(pygame.USEREVENT, self.clock_update_time)  # Set up a custom event for clock updates
 
-            piece = self.board.getPiece(index)
-            self.board.handleClick(piece, rightClick)
+            self.board.handleClick(piece, rightClick, index)
 
             self.firstClick = False
             self.board.lost = False
@@ -247,4 +254,6 @@ class Game():
             return
         else:
             piece = self.board.getPiece(index)
-            self.board.handleClick(piece, rightClick)
+            self.board.handleClick(piece, rightClick, index)
+
+

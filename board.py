@@ -8,28 +8,33 @@ class Board:
         self.won = False
         self.numClicked = 0
         self.numNonBombs = 0
-        self.setBoard()
         self.bombAry = []
         self.flagAry = []
-        self.curIndex = (0, 0)
+        self.setBoard()
+
 
     def setBoard(self):
         self.board = []
-        _bombAry = []
+        _flagAryRow = []
+        _bombAryRow = []
+
         for row in range(self.size[0]):
             row_list = []
             for col in range(self.size[1]):
+
+                _flagAryRow.append(False)
+
                 hasBomb = random() < self.prob
                 if hasBomb:
-                    _bombAry.append(True)  # Add True to boardAry to indicate a bomb
+                    _bombAryRow.append(True)  # Add True to boardAry to indicate a bomb
                 else:
-                    _bombAry.append(False)  # Add False to boardAry to indicate no bomb
+                    _bombAryRow.append(False)  # Add False to boardAry to indicate no bomb
                     self.numNonBombs += 1
                 piece = Piece(hasBomb)
                 row_list.append(piece)
             self.board.append(row_list)
-        self.setNeighbors()
-        self.bombAry = _bombAry
+            self.bombAry.append(_bombAryRow)
+            self.flagAry.append(_flagAryRow)
 
     def getTotalBombs(self):
         return self.numBombs
@@ -56,36 +61,46 @@ class Board:
         return self.size
 
     def getPiece(self, index):
-        self.curIndex = index[0], index[1]
         return self.board[index[0]][index[1]]
     
-    def handleClick(self, piece, rightClick):
-
+    def handleClick(self, piece, rightClick, index=None):
         flags_around = sum(1 for neighbor in piece.getNeighbors() if neighbor.getFlagged())
-
+        
         if piece.getClicked():
-            print(piece.getClicked())
             if flags_around == piece.getNumAround():
                 for neighbor in piece.getNeighbors():
                     if not neighbor.getClicked() and not neighbor.getFlagged():
-                        self.handleClick(neighbor, False)
+                        neighbor_index = self.getPieceIndex(neighbor)
+                        self.handleClick(neighbor, False, neighbor_index)  # Pass the index parameter
+        
         elif rightClick:
             piece.toggleFlag()
-            self.flagAry[(self.curIndex[0])(self.curIndex[1])] = True
-            return self.flagAry[(self.curIndex[0])(self.curIndex[1])]
-            # return
+            self.flagAry[index[0]][index[1]] = True
+            return
+        
         if piece.getFlagged():
             return
+        
         piece.click()
         if piece.getHasBomb():
             self.lost = True
             return
+        
         self.numClicked += 1
         if piece.getNumAround() != 0:
             return
+        
         for neighbor in piece.getNeighbors():
             if not neighbor.getHasBomb() and not neighbor.getClicked():
-                self.handleClick(neighbor, False)
+                neighbor_index = self.getPieceIndex(neighbor)
+                self.handleClick(neighbor, False, neighbor_index)  # Pass the index parameter
+    
+    def getPieceIndex(self, piece):
+        for row_idx, row in enumerate(self.board):
+            if piece in row:
+                col_idx = row.index(piece)
+                return (row_idx, col_idx)
+        return None
         
     def handleClickGameDisabled(self):
         self.setBoard()
@@ -103,3 +118,12 @@ class Board:
     def getStatusRevert(self):
         self.lost = False
         self.won = False
+
+    def resetBoard(self):
+        self.lost = False
+        self.won = False
+        self.numClicked = 0
+        self.numNonBombs = 0
+        self.bombAry = []
+        self.flagAry = []
+        self.setBoard()  # Reset the game board to its initial state

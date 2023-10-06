@@ -160,6 +160,9 @@ class Game():
             self.screen.blit(zero, (self.screenSize[0] // 2 + 37, 10))
             self.screen.blit(zero, (self.screenSize[0] // 2 + 24, 10))
 
+
+        # mine counter
+
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
                 piece = self.board.getPiece((row, col))

@@ -12,6 +12,7 @@ class Board:
         self.numNonBombs = 0
         self.bombAry = []
         self.flagAry = []
+        self.numFlags = 0
         self.setBoard()
 
     def setBoard(self):
@@ -78,6 +79,10 @@ class Board:
         elif rightClick:
             piece.toggleFlag()
             self.flagAry[index[0]][index[1]] = True
+            if piece.getFlagged():
+                self.numFlags += 1
+            elif not piece.getFlagged():
+                self.numFlags -= 1
             return
 
         if piece.getFlagged():
@@ -116,6 +121,9 @@ class Board:
 
     def getWon(self):
         return self.numNonBombs == self.numClicked
+
+    def getNumFlags(self):
+        return self.numFlags
 
     def getStatusRevert(self):
         self.lost = False

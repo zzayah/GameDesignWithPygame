@@ -20,6 +20,8 @@ class Board:
     def setBoard(self):
         self.board = []
         self.numBombs = 0
+        self.numFlags = 0
+        self.correctFlags = 0
 
         for row in range(self.size[0]):
             row_list = []
@@ -84,13 +86,15 @@ class Board:
             piece.toggleFlag()
             self.flagAry[index[0]][index[1]] = True
             print(self.bombAry[index[0]][index[1]])
-            print(self.bombAry)
             if piece.getFlagged() and self.bombAry[index[0]][index[1]]:
                 self.correctFlags += 1
                 print(self.correctFlags)
                 self.numFlags += 1
             elif piece.getFlagged() and not self.bombAry[index[0]][index[1]]:
                 self.numFlags += 1
+            elif not piece.getFlagged() and self.bombAry[index[0]][index[1]]:
+                self.correctFlags -= 1
+                self.numFlags -= 1
             elif not piece.getFlagged():
                 self.numFlags -= 1
             return

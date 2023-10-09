@@ -95,6 +95,7 @@ class Game():
                     self.handleClick(position, rightClick)
 
                     self.numBombsRemaining = self.board.numBombs - self.board.numFlags
+                    print(self.board.correctFlags)
                     actualBombsRemaining = self.board.numBombs - self.board.correctFlags
                     if actualBombsRemaining == 0 and self.board.numFlags == self.board.numBombs:
                         self.won = True
@@ -167,9 +168,13 @@ class Game():
             self.screen.blit(zero, (self.screenSize[0] // 2 + 24, 10))
 
         # mine counter
+        num_mines_tuple = (0,)
         if not self.won:
-            num_mines_str = str(self.numBombsRemaining)
-            num_mines_tuple = tuple(map(int, num_mines_str))
+            if not self.numBombsRemaining < 0:
+                num_mines_str = str(self.numBombsRemaining)
+                num_mines_tuple = tuple(map(int, num_mines_str))
+            else:
+                print("less than 0")
             if len(num_mines_tuple) == 3:
                 if self.firstClick:
                     zero = load_sprite(0, "2000clock")

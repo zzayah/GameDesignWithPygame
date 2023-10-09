@@ -15,7 +15,6 @@ BUTTON_TEXT_SIZE = 36
 
 font = pygame.font.Font(None, 25)
 
-
 def create_button(x, y, text):
     button_rect = pygame.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
     pygame.draw.rect(screen, WHITE, button_rect)
@@ -93,13 +92,13 @@ while difficulty_selecting:
 
     pygame.display.flip()
 
-# Easy: (9, 9) and 10 bombs... prob == .1
+# Easy: (9, 9) and 10 bombs ... prob == .1
 # Medium: (16, 16) and 32 bombs ... prob == .125
 # Hard: (30, 16) and 60 ... prob == .125
 
 if difficulty_selected == 0:
     size = (9, 9)
-    prob = 0.1
+    prob = 0.05
 elif difficulty_selected == 1:
     size = (16, 16)
     prob = 0.125

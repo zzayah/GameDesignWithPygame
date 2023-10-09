@@ -13,31 +13,35 @@ class Board:
         self.bombAry = []
         self.flagAry = []
         self.numFlags = 0
+        self.correctFlags = 0
+        self.numBombs = 0
         self.setBoard()
 
     def setBoard(self):
         self.board = []
-        _flagAryRow = []
-        _bombAryRow = []
+        self.numBombs = 0
 
         for row in range(self.size[0]):
             row_list = []
+            _flagAryRow = []  # Create a new list for each row
+            _bombAryRow = []  # Create a new list for each row
             for col in range(self.size[1]):
-
                 _flagAryRow.append(False)
 
                 hasBomb = random() < self.prob
                 if hasBomb:
-                    _bombAryRow.append(True)  # Add True to boardAry to indicate a bomb
+                    _bombAryRow.append(True)
+                    self.numBombs += 1
                 else:
-                    _bombAryRow.append(False)  # Add False to boardAry to indicate no bomb
+                    _bombAryRow.append(False)
                     self.numNonBombs += 1
                 piece = Piece(hasBomb)
                 row_list.append(piece)
+            self.bombAry.append(_bombAryRow)  # Append the row-specific list to bombAry
+            self.flagAry.append(_flagAryRow)  # Append the row-specific list to flagAry
             self.board.append(row_list)
-            self.bombAry.append(_bombAryRow)
-            self.flagAry.append(_flagAryRow)
         self.setNeighbors()
+
 
     def getTotalBombs(self):
         return self.numBombs
@@ -79,7 +83,13 @@ class Board:
         elif rightClick:
             piece.toggleFlag()
             self.flagAry[index[0]][index[1]] = True
-            if piece.getFlagged():
+            print(self.bombAry[index[0]][index[1]])
+            print(self.bombAry)
+            if piece.getFlagged() and self.bombAry[index[0]][index[1]]:
+                self.correctFlags += 1
+                print(self.correctFlags)
+                self.numFlags += 1
+            elif piece.getFlagged() and not self.bombAry[index[0]][index[1]]:
                 self.numFlags += 1
             elif not piece.getFlagged():
                 self.numFlags -= 1

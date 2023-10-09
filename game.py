@@ -70,6 +70,8 @@ class Game():
         self.clock_update_time = 1000  # Update the clock every 1000 milliseconds (1 second)
         self.last_clock_update = pygame.time.get_ticks()
         self.firstClick = True
+        self.numBombsRemaining = 0
+        self.won = False
 
     def run(self):
         """
@@ -90,11 +92,12 @@ class Game():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     position = pygame.mouse.get_pos()
                     rightClick = pygame.mouse.get_pressed()[2]
-
                     self.handleClick(position, rightClick)
 
-                if event.type == pygame.USEREVENT:
-                    self.updateClock()  # Update the clock every second
+                    self.numBombsRemaining = self.board.numBombs - self.board.numFlags
+                    actualBombsRemaining = self.board.numBombs - self.board.correctFlags
+                    if actualBombsRemaining == 0 and self.board.numFlags == self.board.numBombs:
+                        self.won = True
 
             self.draw()
             pygame.display.flip()
@@ -123,6 +126,7 @@ class Game():
         """
         Draw the game interface.
         """
+
         topLeft = (50, 50)
         GREY_LIGHT = (192, 192, 192)
         GREY_DARK = (128, 128, 128)
@@ -130,7 +134,9 @@ class Game():
         grey_surf.fill(GREY_DARK)
         self.screen.blit(grey_surf, (0, 0))
 
-        if not (self.board.lost):
+        if self.won:
+            self.smile_status = "cool_face"
+        elif not (self.board.lost):
             self.smile_status = "smile"
         else:
             self.smile_status = "dead_face"
@@ -138,15 +144,15 @@ class Game():
         smile = pygame.image.load(f"{self.smile_status}.png")
         smile = pygame.transform.scale(smile, (32, 32))
         self.screen.blit(smile, ((self.screenSize[0] // 2) - 16, 10))
-
         pygame.draw.rect(self.screen, GREY_LIGHT, self.smile_rect, 1)
 
         # Corrected the updateClock placement - only update once per frame
-        if not self.firstClick:
+
+        if not self.firstClick and not self.won and not self.board.lost:
             self.updateClock()
             self.firstClick = False
 
-        if not self.board.lost and not self.firstClick:
+        if not self.firstClick:
             third = load_sprite(self.clock[2], "2000clock")
             second = load_sprite(self.clock[1], "2000clock")
             first = load_sprite(self.clock[0], "2000clock")
@@ -160,8 +166,47 @@ class Game():
             self.screen.blit(zero, (self.screenSize[0] // 2 + 37, 10))
             self.screen.blit(zero, (self.screenSize[0] // 2 + 24, 10))
 
-
         # mine counter
+        if not self.won:
+            num_mines_str = str(self.numBombsRemaining)
+            num_mines_tuple = tuple(map(int, num_mines_str))
+            if len(num_mines_tuple) == 3:
+                if self.firstClick:
+                    zero = load_sprite(0, "2000clock")
+                    self.screen.blit(zero, (self.screenSize[0] // 2 - 66, 10))
+                    self.screen.blit(zero, (self.screenSize[0] // 2 - 53, 10))
+                    self.screen.blit(zero, (self.screenSize[0] // 2 - 40, 10))
+                else:
+                    first = load_sprite(num_mines_tuple[0], "2000clock")
+                    second = load_sprite(num_mines_tuple[1], "2000clock")
+                    third = load_sprite(num_mines_tuple[2], "2000clock")
+                    self.screen.blit(first, (self.screenSize[0] // 2 - 66, 10))
+                    self.screen.blit(second, (self.screenSize[0] // 2 - 53, 10))
+                    self.screen.blit(third, (self.screenSize[0] // 2 - 40, 10))
+            elif len(num_mines_tuple) == 2:
+                if self.firstClick:
+                    zero = load_sprite(0, "2000clock")
+                    self.screen.blit(zero, (self.screenSize[0] // 2 - 53, 10))
+                    self.screen.blit(zero, (self.screenSize[0] // 2 - 40, 10))
+                else:
+                    first = load_sprite(num_mines_tuple[0], "2000clock")
+                    second = load_sprite(num_mines_tuple[1], "2000clock")
+                    self.screen.blit(first, (self.screenSize[0] // 2 - 53, 10))
+                    self.screen.blit(second, (self.screenSize[0] // 2 - 40, 10))
+            elif len(num_mines_tuple) == 1:
+                if self.firstClick:
+                    zero = load_sprite(0, "2000clock")
+                    self.screen.blit(zero, (self.screenSize[0] // 2 - 53, 10))
+                    self.screen.blit(zero, (self.screenSize[0] // 2 - 40, 10))
+                else:
+                    first = load_sprite(0, "2000clock")
+                    second = load_sprite(num_mines_tuple[0], "2000clock")
+                    self.screen.blit(first, (self.screenSize[0] // 2 - 53, 10))
+                    self.screen.blit(second, (self.screenSize[0] // 2 - 40, 10))
+        else:
+            zero = load_sprite(0, "2000clock")
+            self.screen.blit(zero, (self.screenSize[0] // 2 - 53, 10))
+            self.screen.blit(zero, (self.screenSize[0] // 2 - 40, 10))
 
         for row in range(self.board.getSize()[0]):
             for col in range(self.board.getSize()[1]):
@@ -246,6 +291,8 @@ class Game():
         if self.board.lost and self.smile_rect.collidepoint(position):
             pygame.time.set_timer(pygame.USEREVENT, self.clock_update_time)  # Set up a custom event for clock updates
 
+            self.won = False
+
             self.board.handleClickGameDisabled()
             self.board.lost = False
             self.sound_played = False
@@ -259,6 +306,7 @@ class Game():
             return
 
         if self.smile_rect.collidepoint(position):
+            self.won = False
             self.board.handleClickGameDisabled()
             self.board.lost = False
             self.sound_played = False

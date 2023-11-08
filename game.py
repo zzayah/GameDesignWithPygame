@@ -11,14 +11,9 @@ class Game:
 
         self.need_to_place_two = True
 
-    def indices_of_zeros(self, direction):
+    def merge_tiles(self, direction):
         if direction == "up":
-            fin_ary = [[] for _ in range(4)]  # Initialize a list for each column
-            for col in range(4):
-                for row in range(4):
-                    if self.matrix[row][col] == 0:
-                        fin_ary[col].append((row, col))  # Append coordinates of zero element
-            return fin_ary
+            pass
         if direction == "left":
             pass
         if direction == "right":
@@ -63,18 +58,27 @@ class Game:
 
                 keys = pg.key.get_pressed()
                 if keys[pg.K_UP]:
-                    idxs = self.indices_of_zeros("up")
+                    idxs = self.merge_tiles("up")
                     for idx in idxs:
                         print(idx)
                     self.need_to_place_two = True
 
                 elif keys[pg.K_LEFT]:
+                    idxs = self.merge_tiles("left")
+                    for idx in idxs:
+                        print(idx)
                     self.need_to_place_two = True
 
                 elif keys[pg.K_RIGHT]:
+                    idxs = self.merge_tiles("right")
+                    for idx in idxs:
+                        print(idx)
                     self.need_to_place_two = True
 
                 elif keys[pg.K_DOWN]:
+                    idxs = self.merge_tiles("down")
+                    for idx in idxs:
+                        print(idx)
                     self.need_to_place_two = True
 
                 else:

@@ -11,20 +11,19 @@ class Game:
 
         self.need_to_place_two = True
 
-    def indicies_of_zeros(self, direction):
-        ###
-        # Input: Direction of arrow key
-        # Output: Returns indicies of cloest "zeros" present in that given direction.
-        # If no "zeros" are present in a column/row of that direction, nothing is returned
-        ###
-
+    def indices_of_zeros(self, direction):
         if direction == "up":
+            fin_ary = [[] for _ in range(4)]  # Initialize a list for each column
+            for col in range(4):
+                for row in range(4):
+                    if self.matrix[row][col] == 0:
+                        fin_ary[col].append((row, col))  # Append coordinates of zero element
+            return fin_ary
+        if direction == "left":
             pass
-        elif direction == "left":
+        if direction == "right":
             pass
-        elif direction == "right":
-            pass
-        elif direction == "down":
+        if direction == "down":
             pass
 
     def draw(self):
@@ -64,6 +63,9 @@ class Game:
 
                 keys = pg.key.get_pressed()
                 if keys[pg.K_UP]:
+                    idxs = self.indices_of_zeros("up")
+                    for idx in idxs:
+                        print(idx)
                     self.need_to_place_two = True
 
                 elif keys[pg.K_LEFT]:

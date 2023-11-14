@@ -19,83 +19,156 @@ class Game:
 
         self.clock = pg.time.Clock()
 
-    def merge_tiles(self, direc):
-        if not direc == "undo":
-            self.prev_score = copy.deepcopy(self.score)
-            self.prev_board = copy.deepcopy(self.matrix)
+    def merge_tiles(self, direc, bool = None):
 
-        merged = [[False for _ in range(4)] for _ in range(4)]
-        if direc == 'left':
-            for i in range(4):
-                for j in range(4):
-                    shift = 0
-                    if i > 0:
-                        for q in range(i):
-                            if self.matrix[q][j] == 0:
+        if bool:
+
+            check_against = copy.deepcopy(self.matrix)
+
+            merged = [[False for _ in range(4)] for _ in range(4)]
+            if direc == 'left':
+                for i in range(4):
+                    for j in range(4):
+                        shift = 0
+                        if i > 0:
+                            for q in range(i):
+                                if check_against[q][j] == 0:
+                                    shift += 1
+                            if shift > 0:
+                                check_against[i - shift][j] = check_against[i][j]
+                                check_against[i][j] = 0
+                            if check_against[i - shift - 1][j] == check_against[i - shift][j] and not merged[i - shift][j] and not merged[i - shift - 1][j]:
+                                check_against[i - shift - 1][j] *= 2
+                                check_against[i - shift][j] = 0
+                                merged[i - shift - 1][j] = True
+
+            elif direc == 'right':
+                for i in range(3):
+                    for j in range(4):
+                        shift = 0
+                        for q in range(i + 1):
+                            if check_against[3 - q][j] == 0:
                                 shift += 1
                         if shift > 0:
-                            self.matrix[i - shift][j] = self.matrix[i][j]
+                            check_against[2 - i + shift][j] = check_against[2 - i][j]
+                            check_against[2 - i][j] = 0
+                        if 3 - i + shift <= 3:
+                            if check_against[2 - i + shift][j] == check_against[3 - i + shift][j] and not merged[3 - i + shift][j] and not merged[2 - i + shift][j]:
+                                check_against[3 - i + shift][j] *= 2
+                                check_against[2 - i + shift][j] = 0
+                                merged[3 - i + shift][j] = True
+
+            elif direc == 'up':
+                for i in range(4):
+                    for j in range(4):
+                        shift = 0
+                        for q in range(j):
+                            if check_against[i][q] == 0:
+                                shift += 1
+                        if shift > 0:
+                            check_against[i][j - shift] = check_against[i][j]
+                            check_against[i][j] = 0
+                        if check_against[i][j - shift] == check_against[i][j - shift - 1] and not merged[i][j - shift - 1] and not merged[i][j - shift]:
+                            check_against[i][j - shift - 1] *= 2
+                            check_against[i][j - shift] = 0
+                            merged[i][j - shift - 1] = True
+
+            elif direc == 'down':
+                for i in range(4):
+                    for j in range(4):
+                        shift = 0
+                        for q in range(j):
+                            if check_against[i][3 - q] == 0:
+                                shift += 1
+                        if shift > 0:
+                            check_against[i][3 - j + shift] = check_against[i][3 - j]
+                            check_against[i][3 - j] = 0
+                        if 4 - j + shift <= 3:
+                            if check_against[i][4 - j + shift] == check_against[i][3 - j + shift] and not merged[i][4 - j + shift] and not merged[i][3 - j + shift]:
+                                check_against[i][4 - j + shift] *= 2
+                                check_against[i][3 - j + shift] = 0
+                                merged[i][4 - j + shift] = True
+
+            return check_against
+        
+        else:
+
+            if not direc == "undo":
+                self.prev_score = copy.deepcopy(self.score)
+                self.prev_board = copy.deepcopy(self.matrix)
+
+            merged = [[False for _ in range(4)] for _ in range(4)]
+            if direc == 'left':
+                for i in range(4):
+                    for j in range(4):
+                        shift = 0
+                        if i > 0:
+                            for q in range(i):
+                                if self.matrix[q][j] == 0:
+                                    shift += 1
+                            if shift > 0:
+                                self.matrix[i - shift][j] = self.matrix[i][j]
+                                self.matrix[i][j] = 0
+                            if self.matrix[i - shift - 1][j] == self.matrix[i - shift][j] and not merged[i - shift][j] and not merged[i - shift - 1][j]:
+                                self.matrix[i - shift - 1][j] *= 2
+                                self.score += self.matrix[i - shift - 1][j]
+                                self.matrix[i - shift][j] = 0
+                                merged[i - shift - 1][j] = True
+
+            elif direc == 'right':
+                for i in range(3):
+                    for j in range(4):
+                        shift = 0
+                        for q in range(i + 1):
+                            if self.matrix[3 - q][j] == 0:
+                                shift += 1
+                        if shift > 0:
+                            self.matrix[2 - i + shift][j] = self.matrix[2 - i][j]
+                            self.matrix[2 - i][j] = 0
+                        if 3 - i + shift <= 3:
+                            if self.matrix[2 - i + shift][j] == self.matrix[3 - i + shift][j] and not merged[3 - i + shift][j] and not merged[2 - i + shift][j]:
+                                self.matrix[3 - i + shift][j] *= 2
+                                self.score += self.matrix[3 - i + shift][j]
+                                self.matrix[2 - i + shift][j] = 0
+                                merged[3 - i + shift][j] = True
+
+            elif direc == 'up':
+                for i in range(4):
+                    for j in range(4):
+                        shift = 0
+                        for q in range(j):
+                            if self.matrix[i][q] == 0:
+                                shift += 1
+                        if shift > 0:
+                            self.matrix[i][j - shift] = self.matrix[i][j]
                             self.matrix[i][j] = 0
-                        if self.matrix[i - shift - 1][j] == self.matrix[i - shift][j] and not merged[i - shift][j] and not merged[i - shift - 1][j]:
-                            self.matrix[i - shift - 1][j] *= 2
-                            self.score += self.matrix[i - shift - 1][j]
-                            self.matrix[i - shift][j] = 0
-                            merged[i - shift - 1][j] = True
+                        if self.matrix[i][j - shift] == self.matrix[i][j - shift - 1] and not merged[i][j - shift - 1] and not merged[i][j - shift]:
+                            self.matrix[i][j - shift - 1] *= 2
+                            self.score += self.matrix[i][j - shift - 1]
+                            self.matrix[i][j - shift] = 0
+                            merged[i][j - shift - 1] = True
 
-        elif direc == 'right':
-            for i in range(3):
-                for j in range(4):
-                    shift = 0
-                    for q in range(i + 1):
-                        if self.matrix[3 - q][j] == 0:
-                            shift += 1
-                    if shift > 0:
-                        self.matrix[2 - i + shift][j] = self.matrix[2 - i][j]
-                        self.matrix[2 - i][j] = 0
-                    if 3 - i + shift <= 3:
-                        if self.matrix[2 - i + shift][j] == self.matrix[3 - i + shift][j] and not merged[3 - i + shift][j] and not merged[2 - i + shift][j]:
-                            self.matrix[3 - i + shift][j] *= 2
-                            self.score += self.matrix[3 - i + shift][j]
-                            self.matrix[2 - i + shift][j] = 0
-                            merged[3 - i + shift][j] = True
+            elif direc == 'down':
+                for i in range(4):
+                    for j in range(4):
+                        shift = 0
+                        for q in range(j):
+                            if self.matrix[i][3 - q] == 0:
+                                shift += 1
+                        if shift > 0:
+                            self.matrix[i][3 - j + shift] = self.matrix[i][3 - j]
+                            self.matrix[i][3 - j] = 0
+                        if 4 - j + shift <= 3:
+                            if self.matrix[i][4 - j + shift] == self.matrix[i][3 - j + shift] and not merged[i][4 - j + shift] and not merged[i][3 - j + shift]:
+                                self.matrix[i][4 - j + shift] *= 2
+                                self.score += self.matrix[i][4 - j + shift]
+                                self.matrix[i][3 - j + shift] = 0
+                                merged[i][4 - j + shift] = True
+            elif direc == "undo":
+                self.score = self.prev_score
+                self.matrix = copy.deepcopy(self.prev_board)
 
-        elif direc == 'up':
-            for i in range(4):
-                for j in range(4):
-                    shift = 0
-                    for q in range(j):
-                        if self.matrix[i][q] == 0:
-                            shift += 1
-                    if shift > 0:
-                        self.matrix[i][j - shift] = self.matrix[i][j]
-                        self.matrix[i][j] = 0
-                    if self.matrix[i][j - shift] == self.matrix[i][j - shift - 1] and not merged[i][j - shift - 1] and not merged[i][j - shift]:
-                        self.matrix[i][j - shift - 1] *= 2
-                        self.score += self.matrix[i][j - shift - 1]
-                        self.matrix[i][j - shift] = 0
-                        merged[i][j - shift - 1] = True
-
-        elif direc == 'down':
-            for i in range(4):
-                for j in range(4):
-                    shift = 0
-                    for q in range(j):
-                        if self.matrix[i][3 - q] == 0:
-                            shift += 1
-                    if shift > 0:
-                        self.matrix[i][3 - j + shift] = self.matrix[i][3 - j]
-                        self.matrix[i][3 - j] = 0
-                    if 4 - j + shift <= 3:
-                        if self.matrix[i][4 - j + shift] == self.matrix[i][3 - j + shift] and not merged[i][4 - j + shift] and not merged[i][3 - j + shift]:
-                            self.matrix[i][4 - j + shift] *= 2
-                            self.score += self.matrix[i][4 - j + shift]
-                            self.matrix[i][3 - j + shift] = 0
-                            merged[i][4 - j + shift] = True
-        elif direc == "undo":
-            self.score = self.prev_score
-            self.matrix = copy.deepcopy(self.prev_board)
-
-        return self.matrix
+            return self.matrix
 
     def check_won_or_lost(self):
         zeros_exist = False
@@ -107,18 +180,16 @@ class Game:
                     self.won = True
 
         if not self.first_turn and not zeros_exist:
-            # needs to be fixed via adding a "matrix" peram to merge_tiles and inputting a different matrix than self.
-            p = self.prev_board
-            up = self.merge_tiles("up")
-            left = self.merge_tiles("left")
-            down = self.merge_tiles("down")
-            right = self.merge_tiles("right")
-            if up == p and left == p and down == p and right == p:
+            # Check if no move results in a change
+            current_board = copy.deepcopy(self.matrix)
+            moves = ['up', 'down', 'left', 'right']
+            no_change = all(current_board == self.merge_tiles(move) for move in moves)
+            if no_change:
                 self.lost = True
 
     def draw(self):
         if self.won:
-            self.screen.fill((255, 215, 0))
+            # self.screen.fill((255, 215, 0)) <----------- commented to test functionality (working)
             font = pg.font.Font(None, 80)
             text = font.render("YOU WON!", True, (0, 0, 0))
             text_rect = text.get_rect()
@@ -130,7 +201,7 @@ class Game:
             return
 
         elif self.lost:
-            self.screen.fill((0, 0, 0))
+            # self.screen.fill((0, 0, 0)) <------- commented to test functionality (working)
             font = pg.font.Font(None, 80)
             text = font.render("YOU LOST!", True, (255, 255, 255))
             text_rect = text.get_rect()

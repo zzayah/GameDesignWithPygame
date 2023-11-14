@@ -164,6 +164,7 @@ class Game:
                                 self.score += self.matrix[i][4 - j + shift]
                                 self.matrix[i][3 - j + shift] = 0
                                 merged[i][4 - j + shift] = True
+                                
             elif direc == "undo":
                 self.score = self.prev_score
                 self.matrix = copy.deepcopy(self.prev_board)
@@ -250,8 +251,9 @@ class Game:
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
+                    pg.quit()
                     running = False
-
+                    
                 keys = pg.key.get_pressed()
                 if self.won or self.lost:
                     break

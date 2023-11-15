@@ -14,6 +14,7 @@ class Game:
         self.lost = False
         self.score = 0
         self.prev_score = 0
+        self.filled = False
 
         self.need_to_place_two = True
 
@@ -190,7 +191,11 @@ class Game:
 
     def draw(self):
         if self.won:
-            # self.screen.fill((255, 215, 0)) <----------- commented to test functionality (working)
+            if not self.filled:
+                transparent_gold = pg.Surface(self.screen_size, pg.SRCALPHA)
+                transparent_gold.fill((255, 215, 0, 128))
+                self.screen.blit(transparent_gold, (0, 0))
+                self.filled = True
             font = pg.font.Font(None, 80)
             text = font.render("YOU WON!", True, (0, 0, 0))
             text_rect = text.get_rect()
@@ -202,9 +207,13 @@ class Game:
             return
 
         elif self.lost:
-            # self.screen.fill((0, 0, 0)) <------- commented to test functionality (working)
+            if not self.filled:
+                transparent_white = pg.Surface(self.screen_size, pg.SRCALPHA)
+                transparent_white.fill((255, 255, 255, 128))
+                self.screen.blit(transparent_white, (0, 0))
+                self.filled = True
             font = pg.font.Font(None, 80)
-            text = font.render("YOU LOST!", True, (255, 255, 255))
+            text = font.render("YOU LOST!", True, (0, 0, 0))
             text_rect = text.get_rect()
             self.screen.blit(text, (((self.screen.get_width() - text_rect.width) / 2), 113))
 
@@ -214,7 +223,7 @@ class Game:
             return
 
         font = pg.font.Font(None, 30)
-        text = font.render(f"Score: {self.score}", True, (0, 0, 0), (255, 255, 255, 255))
+        text = font.render(f"Score: {self.score}", True, (0, 0, 0), (255, 255, 255))
         self.screen.blit(text, (20, 316))
 
         placed_two = False

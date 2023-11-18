@@ -197,7 +197,7 @@ class Game:
             # Check if no move results in a change
             current_board = copy.deepcopy(self.matrix)
             moves = ['up', 'down', 'left', 'right']
-            no_change = all(current_board == self.merge_tiles(move) for move in moves)
+            no_change = all(current_board == self.merge_tiles(move, True) for move in moves)
             if no_change:
                 self.lost = True
             
@@ -213,10 +213,6 @@ class Game:
             text = font.render("YOU WON!", True, (0, 0, 0))
             text_rect = text.get_rect()
             self.screen.blit(text, (((self.screen.get_width() - text_rect.width) / 2), 113))
-
-            font = pg.font.Font(None, 30)
-            text = font.render(f"Score: {self.score}", True, (0, 0, 0), (255, 255, 255))
-            self.screen.blit(text, (20, 316))
             return
 
         elif self.lost:
@@ -229,10 +225,6 @@ class Game:
             text = font.render("YOU LOST!", True, (0, 0, 0))
             text_rect = text.get_rect()
             self.screen.blit(text, (((self.screen.get_width() - text_rect.width) / 2), 113))
-
-            font = pg.font.Font(None, 30)
-            text = font.render(f"Score: {self.score}", True, (0, 0, 0), (255, 255, 255))
-            self.screen.blit(text, (20, 316))
             return
 
         font = pg.font.Font(None, 30)
@@ -331,8 +323,6 @@ class Game:
                         local_place_two = True
 
                     self.need_to_place_two = local_place_two
-                else:
-                    print("no_imp")
 
             self.check_won_or_lost()
             self.draw()

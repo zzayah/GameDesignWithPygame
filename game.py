@@ -17,13 +17,13 @@ class Game:
         self.filled = False
 
         self.need_to_place_two = True
+        self.delay = 3
 
         self.clock = pg.time.Clock()
 
-    def merge_tiles(self, direc, bool = None):
+    def merge_tiles(self, direc, bool = None, lost = False):
 
         if bool:
-
             check_against = copy.deepcopy(self.matrix)
 
             merged = [[False for _ in range(4)] for _ in range(4)]
@@ -115,6 +115,9 @@ class Game:
                                 self.score += self.matrix[i - shift - 1][j]
                                 self.matrix[i - shift][j] = 0
                                 merged[i - shift - 1][j] = True
+                            self.draw_int()
+                            pg.display.flip()
+                            pg.time.wait(self.delay)
 
             elif direc == 'right':
                 for i in range(3):
@@ -132,6 +135,9 @@ class Game:
                                 self.score += self.matrix[3 - i + shift][j]
                                 self.matrix[2 - i + shift][j] = 0
                                 merged[3 - i + shift][j] = True
+                        self.draw_int()
+                        pg.display.flip()
+                        pg.time.wait(self.delay)
 
             elif direc == 'up':
                 for i in range(4):
@@ -148,6 +154,9 @@ class Game:
                             self.score += self.matrix[i][j - shift - 1]
                             self.matrix[i][j - shift] = 0
                             merged[i][j - shift - 1] = True
+                        self.draw_int()
+                        pg.display.flip()
+                        pg.time.wait(self.delay)
 
             elif direc == 'down':
                 for i in range(4):
@@ -165,6 +174,9 @@ class Game:
                                 self.score += self.matrix[i][4 - j + shift]
                                 self.matrix[i][3 - j + shift] = 0
                                 merged[i][4 - j + shift] = True
+                        self.draw_int()
+                        pg.display.flip()
+                        pg.time.wait(self.delay)
                                 
             elif direc == "undo":
                 self.score = self.prev_score
@@ -188,6 +200,7 @@ class Game:
             no_change = all(current_board == self.merge_tiles(move) for move in moves)
             if no_change:
                 self.lost = True
+            
 
     def draw(self):
         if self.won:
@@ -249,6 +262,13 @@ class Game:
                 sprite = pg.transform.scale(sprite, (64, 64))
                 self.screen.blit(sprite, ((10 + (74 * row)), (10 + (74 * col))))
 
+    def draw_int(self):
+        for row in range(4):
+            for col in range(4):
+                sprite = pg.image.load(f"sprites/{self.matrix[row][col]}.png")
+                sprite = pg.transform.scale(sprite, (64, 64))
+                self.screen.blit(sprite, ((10 + (74 * row)), (10 + (74 * col))))
+
     def run(self):
         pg.init()
         self.screen = pg.display.set_mode(self.screen_size)
@@ -270,17 +290,47 @@ class Game:
                     self.merge_tiles("undo")
                     print("undo move")
                 elif keys[pg.K_UP]:
-                    self.merge_tiles("up")
-                    self.need_to_place_two = True
+
+                    local_place_two = None
+
+                    if self.matrix == self.merge_tiles("up", True):
+                        local_place_two = False
+                    else:
+                        self.merge_tiles("up")
+                        local_place_two = True
+
+                    self.need_to_place_two = local_place_two
+                    
                 elif keys[pg.K_LEFT]:
-                    self.merge_tiles("left")
-                    self.need_to_place_two = True
+                    local_place_two = None
+
+                    if self.matrix == self.merge_tiles("left", True):
+                        local_place_two = False
+                    else:
+                        self.merge_tiles("left")
+                        local_place_two = True
+
+                    self.need_to_place_two = local_place_two
                 elif keys[pg.K_RIGHT]:
-                    self.merge_tiles("right")
-                    self.need_to_place_two = True
+                    local_place_two = None
+
+                    if self.matrix == self.merge_tiles("right", True):
+                        local_place_two = False
+                    else:
+                        self.merge_tiles("right")
+                        local_place_two = True
+
+                    self.need_to_place_two = local_place_two
                 elif keys[pg.K_DOWN]:
-                    self.merge_tiles("down")
-                    self.need_to_place_two = True
+                    local_place_two = None
+
+                    if self.matrix == self.merge_tiles("down", True):
+                        local_place_two = False
+                    else:
+                        self.merge_tiles("down")
+                        local_place_two = True
+
+                    self.need_to_place_two = local_place_two
                 else:
                     print("no_imp")
 

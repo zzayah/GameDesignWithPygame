@@ -1,10 +1,12 @@
 import csv
 import pygame as pg
+import tile
 
 class Main:
 
     def __init__(self, filename):
-        self.board = []
+        self.board_names = []
+        self.board_tiles
         self.filename
         self.current_pos = []
         self.running = True
@@ -12,8 +14,12 @@ class Main:
         self.screen = None
 
     def set_board(self):
-        with open(f"{self.filename}.csv", "r") as ins:
-            self.board = [[str(t) for t in line.split()] for line in ins]
+        with open(f"{self.filename}.txt", "r") as ins:
+            self.board_names = [[str(t) for t in line.split()] for line in ins]
+        
+        for row in range(9):
+            for col in range(9):
+                self.board_tiles[row][col] = tile(f"{self.board_names[row][col]}")
 
     def draw(self):
         if self.first_turn:

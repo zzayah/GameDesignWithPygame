@@ -5,73 +5,85 @@ import copy
 
 class Main:
 
-    def __init__(self):
+    def __init__(self, filename):
+        self.filename = filename
         self.board_names = []
-        self.board_tiles
-        self.filename
+        self.new_board = None
+        self.board_tiles = None
         self.current_pos = []
         self.running = True
-        self.first_turn = False
-        
-        self.alteration_right = 0
-        self.alteration_down = 0
+        self.first_turn = True  # Fix typo in the variable name
+
+        self.alteration_right = 5
+        self.alteration_down = 5
+
+        self.screen = pg.display.set_mode((776, 616))
+
 
     def set_board(self):
         with open(f"{self.filename}.txt", "r") as ins:
             self.board_names = [[str(t) for t in line.split()] for line in ins]
-        
+
         height = len(self.board_names)
-        width = len(self.baord_names[0])
-        new_board = [[]]
-        for row in range(height+5):
-            for col in range(width+5):
-                new_board[row][col] = "floor"
-        
+        width = len(self.board_names[0])
+
+        # Initialize new_board and board_tiles
+        self.new_board = [["floor" for _ in range(width + 10)] for _ in range(height + 10)]
+        self.board_tiles = [[tile.Tile("floor") for _ in range(width + 10)] for _ in range(height + 10)]
+
         for row in range(height):
             for col in range(width):
-                new_board[row+5][col+5] = self.board_names[row][col]
-        
-        for row in range(9):
-            for col in range(9):
-                self.board_tiles[row][col] = tile(f"{self.board_names[row][col]}")
+                self.new_board[row + 5][col + 5] = self.board_names[row][col]
+                self.board_tiles[row + 5][col + 5] = tile.Tile(self.board_names[row][col])
 
     def draw(self):
         if self.first_turn:
-            # tiles are 64 x 64 (= 576) and y coordinate is gives 20 pixels of room
-            screen = pg.display.set_mode((776, 616))
-            screen.fill((255, 255, 255))
-            # screen.blit()
+            # tiles are 64 x 64 (= 576) and y coordinate gives 20 pixels of room
+            self.screen.fill((255, 255, 255))
+            self.first_turn = False
 
         for row in range(9):
             for col in range(9):
-                image_path = f"{self.board_tiles[row + (self.alteration_right)][col + (self.alteration_down)].get_type()}"
+                # image_path = f"{self.board_tiles[row + self.alteration_down][col + self.alteration_right].get_type()}.png"
+                image_path = "ChipsSprites.png"
                 tile_surf = pg.image.load(image_path)
-                screen.blit(tile_surf, (64 * row + 100, 64 * col + 20))
-                
+                crop_rect = pg.Rect(0, 0, 32, 32)
+                cropped_image = tile_surf.subsurface(crop_rect)
+                pg.transform.scale(cropped_image, (64, 64))
+                self.screen.blit(cropped_image, (64 * col + 20, 64 * row + 20))
+
+        # Update the display
+        pg.display.flip()
+
     def run(self):
+        pg.init()
+        self.set_board()  # Call set_board before entering the game loop
         while self.running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
-                elif event.type == pg.UP:
-                    if self.alteration_down == 0:
-                        return
-                    elif self.alteration_down > 0:
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_UP:
+                        if self.alteration_down == 5:
+                            continue
+                        elif self.alteration_down > 5:
+                            self.alteration_down -= 1  # Fix direction
+                        else:
+                            print("self.alteration_down error")
+                    elif event.key == pg.K_DOWN:
                         self.alteration_down += 1
-                    else:
-                        print("self.alteration_down error")
-                elif event.type == pg.DOWN:
-                    self.alteration_down += 1
-                elif event.type == pg.LEFT:
-                    if self.alteration_right == 0:
-                        return
-                    elif self.alteration_right > 0:
+                    elif event.key == pg.K_LEFT:
+                        if self.alteration_right == 5:
+                            continue
+                        elif self.alteration_right > 5:
+                            self.alteration_right -= 1  # Fix direction
+                        else:
+                            print("self.alteration_right error")
+                    elif event.key == pg.K_RIGHT:
                         self.alteration_right += 1
-                    else:
-                        print("self.alteration_right error")
-                elif event.type == pg.RIGHT:
-                    self.alteration_right += 1
-
             self.draw()
-            pg.display.flip()
-            
+
+if __name__ == "__main__":
+    Game = Main("CC")
+    Game.run()
+    pg.quit()  # Add pygame.quit() to ensure a clean exit

@@ -17,6 +17,11 @@ class Main:
         self.alteration_right = 5
         self.alteration_down = 5
 
+        self.sprite_sheet_pos = {
+            "floor": (0, 0, 32, 32), # 0 x 0
+            "player": (192, 448, 32, 32) # 6 x 14
+        }
+
         self.screen = pg.display.set_mode((776, 616))
 
 
@@ -44,13 +49,19 @@ class Main:
 
         for row in range(9):
             for col in range(9):
-                # image_path = f"{self.board_tiles[row + self.alteration_down][col + self.alteration_right].get_type()}.png"
+                cropped_image = None
                 image_path = "ChipsSprites.png"
                 tile_surf = pg.image.load(image_path)
-                crop_rect = pg.Rect(0, 0, 32, 32)
-                cropped_image = tile_surf.subsurface(crop_rect)
-                pg.transform.scale(cropped_image, (64, 64))
-                self.screen.blit(cropped_image, (64 * col + 20, 64 * row + 20))
+
+                if self.new_board[row][col] == "player":
+                    crop_rect = pg.Rect(self.sprite_sheet_pos["player"])
+                    cropped_image = tile_surf.subsurface(crop_rect)
+                elif self.new_board[row][col] == "floor":
+                    crop_rect = pg.Rect(self.sprite_sheet_pos["floor"])
+                    cropeed_image = tile_surf.subsurface(crop_rect)
+
+                scaled_image = pg.transform.scale(cropped_image, (64, 64))
+                self.screen.blit(scaled_image, (64 * col + 20, 64 * row + 20))
 
         # Update the display
         pg.display.flip()

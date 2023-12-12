@@ -50,17 +50,17 @@ class Main:
         
         for row in range(9):
             for col in range(9):
-                self.current_pos[row][col] = self.board_tiles[row+5+self.alteration_right][col+5+self.alteration_right]
+                self.current_pos[row][col] = self.board_tiles[row+4+self.alteration_down][col+4+self.alteration_right]
 
         for row in range(9):
             for col in range(9):
                 cropped_image = None
                 image_path = "ChipsSprites.png"
                 tile_surf = pg.image.load(image_path)
-                if self.current_pos[row][col].get_type == "player":
+                if self.current_pos[row][col].get_type() == "player":
                     crop_rect = pg.Rect(self.sprite_sheet_pos["player"])
                     cropped_image = tile_surf.subsurface(crop_rect)
-                elif self.current_pos[row][col].get_type == "floor":
+                elif self.current_pos[row][col].get_type() == "floor":
                     crop_rect = pg.Rect(self.sprite_sheet_pos["floor"])
                     cropped_image = tile_surf.subsurface(crop_rect)
 
@@ -80,22 +80,22 @@ class Main:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_UP:
-                        if self.alteration_down > 4 and self.alteration_down <= 10:
+                        if self.alteration_down > 4 and self.alteration_down <= 13:
                             self.alteration_down -= 1                            
                         else:
                             print("self.alteration_down error. (pg.K_UP)")
                     elif event.key == pg.K_DOWN:
-                        if self.alteration_down < 10:
+                        if self.alteration_down < 13:
                             self.alteration_down += 1
                         else:
                             print("self.alteration_down error. (pg.K_DOWN)")
                     elif event.key == pg.K_LEFT:
-                        if self.alteration_right > 4 and self.alteration_right <= 10:
+                        if self.alteration_right > 4 and self.alteration_right <= 13:
                             self.alteration_right -= 1
                         else:
                             print("self.alteration_right error. (pg.K_LEFT)")
                     elif event.key == pg.K_RIGHT:
-                        if self.alteration_right < 10:
+                        if self.alteration_right < 13:
                             self.alteration_right += 1
             self.draw()
 

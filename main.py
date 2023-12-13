@@ -20,7 +20,8 @@ class Main:
 
         self.sprite_sheet_pos = {
             "floor": (0, 0, 32, 32), # 0 x 0
-            "player": (192, 448, 32, 32) # 6 x 14
+            "player": (192, 448, 32, 32), # 6 x 14
+            "solid": (0, 32, 32, 32) # 0 x 1
         }
 
         self.screen = pg.display.set_mode((776, 616))
@@ -34,13 +35,19 @@ class Main:
         width = len(self.board_names[0])
 
         # Initialize new_board and board_tiles
-        self.new_board = [["floor" for _ in range(width + 10)] for _ in range(height + 10)]
-        self.board_tiles = [[tile.Tile("floor") for _ in range(width + 10)] for _ in range(height + 10)]
+        self.new_board = [["floor" for _ in range(width + 8)] for _ in range(height + 8)]
+        self.board_tiles = [[tile.Tile("floor") for _ in range(width + 8)] for _ in range(height + 8)]
 
         for row in range(height):
             for col in range(width):
                 self.new_board[row + 4][col + 4] = self.board_names[row][col]
                 self.board_tiles[row + 4][col + 4] = tile.Tile(self.board_names[row][col])
+        
+        for row in range(len(self.board_tiles)):
+            for col in range(len(self.board_tiles[0])):
+                if self.board_tiles[row][col].get_type() == "player":
+                    self.alteration_down = row
+                    self.alteration_right = col
 
     def draw(self):
         if self.first_turn:
@@ -50,19 +57,17 @@ class Main:
         
         for row in range(9):
             for col in range(9):
-                self.current_pos[row][col] = self.board_tiles[row+4+self.alteration_down][col+4+self.alteration_right]
+                self.current_pos[row][col] = self.board_tiles[row+self.alteration_down-4][col+self.alteration_right-4]
 
         for row in range(9):
             for col in range(9):
                 cropped_image = None
                 image_path = "ChipsSprites.png"
                 tile_surf = pg.image.load(image_path)
-                if self.current_pos[row][col].get_type() == "player":
-                    crop_rect = pg.Rect(self.sprite_sheet_pos["player"])
-                    cropped_image = tile_surf.subsurface(crop_rect)
-                elif self.current_pos[row][col].get_type() == "floor":
-                    crop_rect = pg.Rect(self.sprite_sheet_pos["floor"])
-                    cropped_image = tile_surf.subsurface(crop_rect)
+
+                current_tile = self.current_pos[row][col].get_type()
+                crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
+                cropped_image = tile_surf.subsurface(crop_rect)
 
                 scaled_image = pg.transform.scale(cropped_image, (64, 64))
                 self.screen.blit(scaled_image, (64 * col + 20, 64 * row + 20))
@@ -80,26 +85,30 @@ class Main:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_UP:
-                        if self.alteration_down > 4 and self.alteration_down <= 13:
+                        if self.alteration_down > 4 and self.alteration_down <= len(self.board_tiles[0])-4:
+                            if self.board_tiles[self.alteration_down-5][self.alteration_right-4].get_type() == "floor":
+                                print("stop")
                             self.alteration_down -= 1                            
                         else:
                             print("self.alteration_down error. (pg.K_UP)")
                     elif event.key == pg.K_DOWN:
-                        if self.alteration_down < 13:
+                        if self.alteration_down < len(self.board_tiles[0])-5:
                             self.alteration_down += 1
                         else:
                             print("self.alteration_down error. (pg.K_DOWN)")
                     elif event.key == pg.K_LEFT:
-                        if self.alteration_right > 4 and self.alteration_right <= 13:
+                        if self.alteration_right > 4 and self.alteration_right <= len(self.board_tiles)-4:
                             self.alteration_right -= 1
                         else:
                             print("self.alteration_right error. (pg.K_LEFT)")
                     elif event.key == pg.K_RIGHT:
-                        if self.alteration_right < 13:
+                        if self.alteration_right < len(self.board_tiles)-5:
                             self.alteration_right += 1
+                        else:
+                            print("self.alteration_right error. (K_RIGHT)")
             self.draw()
 
 if __name__ == "__main__":
     Game = Main("CC")
     Game.run()
-    pg.quit()  # Add pygame.quit() to ensure a clean exit
+    pg.quit()

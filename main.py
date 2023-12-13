@@ -48,6 +48,7 @@ class Main:
                 if self.board_tiles[row][col].get_type() == "player":
                     self.alteration_down = row
                     self.alteration_right = col
+                    self.board_tiles[row][col] = tile.Tile("floor")
 
     def draw(self):
         if self.first_turn:
@@ -58,6 +59,8 @@ class Main:
         for row in range(9):
             for col in range(9):
                 self.current_pos[row][col] = self.board_tiles[row+self.alteration_down-4][col+self.alteration_right-4]
+        # set player in the middle
+        self.current_pos[4][4] = tile.Tile("player")
 
         for row in range(9):
             for col in range(9):
@@ -86,24 +89,38 @@ class Main:
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_UP:
                         if self.alteration_down > 4 and self.alteration_down <= len(self.board_tiles[0])-4:
-                            if self.board_tiles[self.alteration_down-5][self.alteration_right-4].get_type() == "floor":
-                                print("stop")
-                            self.alteration_down -= 1                            
+                            if self.board_tiles[self.alteration_down-1][self.alteration_right].get_type() == "solid":
+                                print("solid in the way")
+                                break
+                            else:
+                                self.alteration_down -= 1
                         else:
                             print("self.alteration_down error. (pg.K_UP)")
                     elif event.key == pg.K_DOWN:
                         if self.alteration_down < len(self.board_tiles[0])-5:
-                            self.alteration_down += 1
+                            if self.board_tiles[self.alteration_down+1][self.alteration_right].get_type() == "solid":
+                                print("solid in the way")
+                                break
+                            else:
+                                self.alteration_down += 1
                         else:
                             print("self.alteration_down error. (pg.K_DOWN)")
                     elif event.key == pg.K_LEFT:
                         if self.alteration_right > 4 and self.alteration_right <= len(self.board_tiles)-4:
-                            self.alteration_right -= 1
+                            if self.board_tiles[self.alteration_down][self.alteration_right-1].get_type() == "solid":
+                                print("solid in the way")
+                                break
+                            else:
+                                self.alteration_right -= 1
                         else:
                             print("self.alteration_right error. (pg.K_LEFT)")
                     elif event.key == pg.K_RIGHT:
                         if self.alteration_right < len(self.board_tiles)-5:
-                            self.alteration_right += 1
+                            if self.board_tiles[self.alteration_down][self.alteration_right+1].get_type() == "solid":
+                                print("solid in the way")
+                                break
+                            else:
+                                self.alteration_right += 1
                         else:
                             print("self.alteration_right error. (K_RIGHT)")
             self.draw()

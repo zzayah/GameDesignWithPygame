@@ -4,6 +4,7 @@ class Tile:
         self.tile_type = tile_type
 
         self.attributes = {
+            "solid": False,
             "player": False,
             "floor": False,
             "blank": False,

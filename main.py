@@ -21,7 +21,9 @@ class Main:
         self.sprite_sheet_pos = {
             "floor": (0, 0, 32, 32), # 0 x 0
             "player": (192, 448, 32, 32), # 6 x 14
-            "solid": (0, 32, 32, 32) # 0 x 1
+            "solid": (0, 32, 32, 32), # 0 x 1
+            "water": (0, 96, 32, 32),
+            "chip": (0, 64, 32, 32)
         }
 
         self.screen = pg.display.set_mode((776, 616))
@@ -65,12 +67,18 @@ class Main:
         for row in range(9):
             for col in range(9):
                 cropped_image = None
-                image_path = "ChipsSprites.png"
+                image_path = "ChipsSprites (3).png"
                 tile_surf = pg.image.load(image_path)
 
-                current_tile = self.current_pos[row][col].get_type()
-                crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
-                cropped_image = tile_surf.subsurface(crop_rect)
+                if self.current_pos[row][col].get_type() == "player":
+                    current_tile = self.current_pos[row][col].get_type()
+                    crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
+                    cropped_image = tile_surf.subsurface(crop_rect)
+                    cropped_image.set_colorkey((255, 255, 255))
+                else:
+                    current_tile = self.current_pos[row][col].get_type()
+                    crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
+                    cropped_image = tile_surf.subsurface(crop_rect)
 
                 scaled_image = pg.transform.scale(cropped_image, (64, 64))
                 self.screen.blit(scaled_image, (64 * col + 20, 64 * row + 20))

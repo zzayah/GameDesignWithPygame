@@ -9,6 +9,7 @@ class Tile:
             "floor": False,
             "blank": False,
             "water": False,
+            "chip": False,
             "fire": False,
             "accelerate_left": False,
             "accelerate_right": False,

@@ -20,7 +20,7 @@ class Main:
 
         self.sprite_sheet_pos = {
             "floor": (0, 0, 32, 32), # 0 x 0
-            "player": (192, 448, 32, 32), # 6 x 14
+            "player": (64, 448, 32, 32), # 6 x 14
             "solid": (0, 32, 32, 32), # 0 x 1
             "water": (0, 96, 32, 32),
             "chip": (0, 64, 32, 32)
@@ -62,26 +62,26 @@ class Main:
             for col in range(9):
                 self.current_pos[row][col] = self.board_tiles[row+self.alteration_down-4][col+self.alteration_right-4]
         # set player in the middle
-        self.current_pos[4][4] = tile.Tile("player")
+        # self.current_pos[4][4] = tile.Tile("player")
 
         for row in range(9):
             for col in range(9):
-                cropped_image = None
-                image_path = "ChipsSprites (3).png"
+                image_path = "ChipsSprites.png"
                 tile_surf = pg.image.load(image_path)
-
-                if self.current_pos[row][col].get_type() == "player":
-                    current_tile = self.current_pos[row][col].get_type()
-                    crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
-                    cropped_image = tile_surf.subsurface(crop_rect)
-                    cropped_image.set_colorkey((255, 255, 255))
-                else:
-                    current_tile = self.current_pos[row][col].get_type()
-                    crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
-                    cropped_image = tile_surf.subsurface(crop_rect)
-
+                current_tile = self.current_pos[row][col].get_type()
+                crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
+                cropped_image = tile_surf.subsurface(crop_rect)
                 scaled_image = pg.transform.scale(cropped_image, (64, 64))
                 self.screen.blit(scaled_image, (64 * col + 20, 64 * row + 20))
+
+        # blit player on top of the board
+        player_image_path = "ChipsSprites (4).png"
+        player_tile_surf = pg.image.load(player_image_path)
+        player_crop_rect = pg.Rect(self.sprite_sheet_pos["player"])
+        cropped_player = player_tile_surf.subsurface(player_crop_rect)
+        scaled_player = pg.transform.scale(cropped_player, (64, 64))
+        scaled_player.set_colorkey((255, 255, 255))
+        self.screen.blit(scaled_player, ((64 * 4 + 20), (64 * 4 + 20)))
 
         # Update the display
         pg.display.flip()

@@ -18,16 +18,18 @@ class Main:
         self.alteration_right = 4
         self.alteration_down = 4
 
+        self.inventory = [["floor" for _ in range(4)] for _ in range(2)]
+
         self.sprite_sheet_pos = {
             "floor": (0, 0, 32, 32), # 0 x 0
-            "player": (64, 448, 32, 32), # 6 x 14
+            "player": (64, 448, 32, 32), # 3 x 14
             "solid": (0, 32, 32, 32), # 0 x 1
             "water": (0, 96, 32, 32),
-            "chip": (0, 64, 32, 32)
+            "chip": (0, 64, 32, 32),
+            "wboot": (192, 256, 32, 32) # 6 x 8
         }
 
         self.screen = pg.display.set_mode((776, 616))
-
 
     def set_board(self):
         with open(f"{self.filename}.txt", "r") as ins:
@@ -57,6 +59,15 @@ class Main:
             # tiles are 64 x 64 (= 576) and y coordinate gives 20 pixels of room
             self.screen.fill((255, 255, 255))
             self.first_turn = False
+
+        for row in range(2):
+            for col in range(4):
+                item_image_path = "ChipsSprites (3).png"
+                item_tile_surf = pg.image.load(item_image_path)
+                item_crop_rect = pg.Rect(self.sprite_sheet_pos[self.inventory[row][col]])
+                cropped_item = item_tile_surf.subsurface(item_crop_rect)
+                scaled_item = pg.transform.scale(cropped_item, (64, 64))
+                self.screen.blit(scaled_item, ((row * 64 + (576+46)), (col* 64 + (320+20))))
         
         for row in range(9):
             for col in range(9):
@@ -96,10 +107,13 @@ class Main:
                     self.running = False
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_UP:
+                        check_against = self.board_tiles[self.alteration_down-1][self.alteration_right].get_type()
                         if self.alteration_down > 4 and self.alteration_down <= len(self.board_tiles[0])-4:
-                            if self.board_tiles[self.alteration_down-1][self.alteration_right].get_type() == "solid":
+                            if check_against == "solid":
                                 print("solid in the way")
                                 break
+                            elif check_against == "water" and not (any("w_boot" in row for row in self.inventory)):
+                                print("water, no water boots")
                             else:
                                 self.alteration_down -= 1
                         else:

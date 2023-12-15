@@ -14,7 +14,8 @@ class Tile:
             "accelerate_left": False,
             "accelerate_right": False,
             "accelerate_down": False,
-            "accelerate_up": False
+            "accelerate_up": False,
+            "wboot": False
         }
 
         # sets the tile's type

@@ -1,7 +1,5 @@
-import csv
 import pygame as pg
 import tile
-import copy
 
 class Main:
 
@@ -13,7 +11,10 @@ class Main:
         self.current_pos = [[None for _ in range(9)] for _ in range(9)]  # Initialize current_pos list
 
         self.running = True
-        self.first_turn = True  # Fix typo in the variable name
+        self.first_turn = True
+        
+        self.lost = False
+        self.won = False
 
         self.alteration_right = 4
         self.alteration_down = 4
@@ -26,7 +27,12 @@ class Main:
             "solid": (0, 32, 32, 32), # 0 x 1
             "water": (0, 96, 32, 32),
             "chip": (0, 64, 32, 32),
-            "wboot": (192, 256, 32, 32) # 6 x 8
+            "wboot": (192, 256, 32, 32), # 6 x 8
+            "acc_ri": (32, 96, 32, 32),
+            "acc_le": (32, 128, 32, 32),
+            "red_k": (192, 160, 32, 32),
+            "red_d": (32, 224, 32, 32),
+            "info": (64, 480, 32, 32)
         }
 
         self.screen = pg.display.set_mode((776, 616))
@@ -38,8 +44,10 @@ class Main:
         height = len(self.board_names)
         width = len(self.board_names[0])
 
-        # Initialize new_board and board_tiles
+        # create 4 space boarder around the entire map
         self.new_board = [["floor" for _ in range(width + 8)] for _ in range(height + 8)]
+
+        # set all text to tile objects
         self.board_tiles = [[tile.Tile("floor") for _ in range(width + 8)] for _ in range(height + 8)]
 
         for row in range(height):
@@ -55,47 +63,58 @@ class Main:
                     self.board_tiles[row][col] = tile.Tile("floor")
 
     def draw(self):
-        if self.first_turn:
-            # tiles are 64 x 64 (= 576) and y coordinate gives 20 pixels of room
+
+        if self.lost:
             self.screen.fill((255, 255, 255))
-            self.first_turn = False
+            font = pg.font.Font(None, 70)
+            game_over_txt = font.render("GAME OVER", True, (0, 0, 0))
+            text_rect = game_over_txt.get_rect()
+            text_rect.center = (776//2, 616//2)
+            self.screen.blit(game_over_txt, text_rect)
+            pg.display.flip()
+        else:
 
-        for row in range(2):
-            for col in range(4):
-                item_image_path = "ChipsSprites (3).png"
-                item_tile_surf = pg.image.load(item_image_path)
-                item_crop_rect = pg.Rect(self.sprite_sheet_pos[self.inventory[row][col]])
-                cropped_item = item_tile_surf.subsurface(item_crop_rect)
-                scaled_item = pg.transform.scale(cropped_item, (64, 64))
-                self.screen.blit(scaled_item, ((row * 64 + (576+46)), (col* 64 + (320+20))))
-        
-        for row in range(9):
-            for col in range(9):
-                self.current_pos[row][col] = self.board_tiles[row+self.alteration_down-4][col+self.alteration_right-4]
-        # set player in the middle
-        # self.current_pos[4][4] = tile.Tile("player")
+            if self.first_turn:
+                # tiles are 64 x 64 (= 576) and y coordinate gives 20 pixels of room
+                self.screen.fill((255, 255, 255))
+                self.first_turn = False
 
-        for row in range(9):
-            for col in range(9):
-                image_path = "ChipsSprites.png"
-                tile_surf = pg.image.load(image_path)
-                current_tile = self.current_pos[row][col].get_type()
-                crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
-                cropped_image = tile_surf.subsurface(crop_rect)
-                scaled_image = pg.transform.scale(cropped_image, (64, 64))
-                self.screen.blit(scaled_image, (64 * col + 20, 64 * row + 20))
+            for row in range(2):
+                for col in range(4):
+                    item_image_path = "ChipsSprites (3).png"
+                    item_tile_surf = pg.image.load(item_image_path)
+                    item_crop_rect = pg.Rect(self.sprite_sheet_pos[self.inventory[row][col]])
+                    cropped_item = item_tile_surf.subsurface(item_crop_rect)
+                    scaled_item = pg.transform.scale(cropped_item, (64, 64))
+                    self.screen.blit(scaled_item, ((row * 64 + (576+46)), (col* 64 + (320+20))))
+            
+            for row in range(9):
+                for col in range(9):
+                    self.current_pos[row][col] = self.board_tiles[row+self.alteration_down-4][col+self.alteration_right-4]
+            # set player in the middle
+            # self.current_pos[4][4] = tile.Tile("player")
 
-        # blit player on top of the board
-        player_image_path = "ChipsSprites (4).png"
-        player_tile_surf = pg.image.load(player_image_path)
-        player_crop_rect = pg.Rect(self.sprite_sheet_pos["player"])
-        cropped_player = player_tile_surf.subsurface(player_crop_rect)
-        scaled_player = pg.transform.scale(cropped_player, (64, 64))
-        scaled_player.set_colorkey((255, 255, 255))
-        self.screen.blit(scaled_player, ((64 * 4 + 20), (64 * 4 + 20)))
+            for row in range(9):
+                for col in range(9):
+                    image_path = "ChipsSprites.png"
+                    tile_surf = pg.image.load(image_path)
+                    current_tile = self.current_pos[row][col].get_type()
+                    crop_rect = pg.Rect(self.sprite_sheet_pos[current_tile])
+                    cropped_image = tile_surf.subsurface(crop_rect)
+                    scaled_image = pg.transform.scale(cropped_image, (64, 64))
+                    self.screen.blit(scaled_image, (64 * col + 20, 64 * row + 20))
 
-        # Update the display
-        pg.display.flip()
+            # blit player on top of the board
+            player_image_path = "ChipsSprites (4).png"
+            player_tile_surf = pg.image.load(player_image_path)
+            player_crop_rect = pg.Rect(self.sprite_sheet_pos["player"])
+            cropped_player = player_tile_surf.subsurface(player_crop_rect)
+            scaled_player = pg.transform.scale(cropped_player, (64, 64))
+            scaled_player.set_colorkey((255, 255, 255))
+            self.screen.blit(scaled_player, ((64 * 4 + 20), (64 * 4 + 20)))
+
+            # Update the display
+            pg.display.flip()
 
     def run(self):
         pg.init()
@@ -105,15 +124,47 @@ class Main:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
-                elif event.type == pg.KEYDOWN:
+                elif event.type == pg.KEYDOWN and not self.lost:
                     if event.key == pg.K_UP:
                         check_against = self.board_tiles[self.alteration_down-1][self.alteration_right].get_type()
                         if self.alteration_down > 4 and self.alteration_down <= len(self.board_tiles[0])-4:
                             if check_against == "solid":
                                 print("solid in the way")
                                 break
-                            elif check_against == "water" and not (any("w_boot" in row for row in self.inventory)):
-                                print("water, no water boots")
+                            elif check_against == "wboot":
+                                self.board_tiles[self.alteration_down-1][self.alteration_right] = tile.Tile("floor")
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "wboot"
+                                        self.alteration_down -= 1
+                                        break
+                            elif check_against == "chip":
+                                self.board_tiles[self.alteration_down-1][self.alteration_right] = tile.Tile("floor")
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "chip"
+                                        self.alteration_down -= 1
+                                        break
+                            elif check_against == "red_k":
+                                self.board_tiles[self.alteration_down-1][self.alteration_right] = tile.Tile("floor")
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "red_k"
+                                        self.alteration_down -= 1
+                                        break
+                            elif check_against == "red_d":
+                                for row in self.inventory:
+                                    if "red_k" in row:
+                                        row[row.index("red_k")] = "floor"
+                                        self.alteration_down -= 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "water" and not (any("wboot" in row for row in self.inventory)):
+                                self.lost = True
+                                print("You are not Jesus. Next time, don't try to walk on water without Flippers. Game over.")
+                            elif check_against == "info":
+                                print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                self.alteration_down -= 1
                             else:
                                 self.alteration_down -= 1
                         else:
@@ -128,18 +179,26 @@ class Main:
                         else:
                             print("self.alteration_down error. (pg.K_DOWN)")
                     elif event.key == pg.K_LEFT:
+                        check_against = self.board_tiles[self.alteration_down][self.alteration_right-1].get_type()
                         if self.alteration_right > 4 and self.alteration_right <= len(self.board_tiles)-4:
-                            if self.board_tiles[self.alteration_down][self.alteration_right-1].get_type() == "solid":
+                            if check_against == "solid":
                                 print("solid in the way")
+                                break
+                            elif check_against == "acc_le":
+                                self.alteration_right -= 2
                                 break
                             else:
                                 self.alteration_right -= 1
                         else:
                             print("self.alteration_right error. (pg.K_LEFT)")
                     elif event.key == pg.K_RIGHT:
+                        check_against = self.board_tiles[self.alteration_down][self.alteration_right+1].get_type()
                         if self.alteration_right < len(self.board_tiles)-5:
-                            if self.board_tiles[self.alteration_down][self.alteration_right+1].get_type() == "solid":
+                            if check_against == "solid":
                                 print("solid in the way")
+                                break
+                            elif check_against == "acc_ri":
+                                self.alteration_right += 2
                                 break
                             else:
                                 self.alteration_right += 1

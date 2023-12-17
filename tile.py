@@ -5,30 +5,23 @@ class Tile:
 
         self.attributes = {
             "solid": False,
+            "wboot": False,
             "player": False,
             "floor": False,
-            "blank": False,
-            "water": False,
             "chip": False,
+            "red_k": False,
+            "red_d": False,
+            "info": False,
+            "water": False,
             "fire": False,
-            "accelerate_left": False,
-            "accelerate_right": False,
+            "acc_ri": False,
+            "acc_le": False,
             "accelerate_down": False,
-            "accelerate_up": False,
-            "wboot": False
+            "accelerate_up": False
         }
 
-        # sets the tile's type
-        if self.tile_type in self.attributes:
-            self.attributes[self.tile_type] = True
-        else:
-            print(f"Invalid tile type: {self.tile_type}")
+        self.attributes[self.tile_type] = True
     
     def get_type(self):
         # returns the tile's type
-        attr_list = list(self.attributes)
-        for i in range(6): # number of attributes
-            if attr_list[i] == self.tile_type:
-                return attr_list[i]
-
-
+        return self.tile_type

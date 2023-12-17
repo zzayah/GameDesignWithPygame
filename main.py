@@ -1,5 +1,6 @@
 import pygame as pg
 import tile
+import math
 
 class Main:
 
@@ -23,6 +24,12 @@ class Main:
         self.alteration_right = 4
         self.alteration_down = 4
 
+        # for enemy movement
+        self.prev_time = 0
+        self.time_now = 0
+        self.altered_enemy_location = None
+        self.enemy_location = None
+
         self.inventory = [["floor" for _ in range(4)] for _ in range(2)]
 
         self.sprite_sheet_pos = {
@@ -37,7 +44,10 @@ class Main:
             "red_k": (192, 160, 32, 32),
             "red_d": (32, 224, 32, 32),
             "info": (64, 480, 32, 32),
-            "pad": (96, 320, 32, 32)
+            "pad": (96, 320, 32, 32),
+            "enemy": (192, 0, 32, 32),
+            "dirt": (32, 0, 32, 32),
+            "wdirt": (32, 448, 32, 32)
         }
 
         self.time = None
@@ -63,10 +73,15 @@ class Main:
         
         for row in range(len(self.board_tiles)):
             for col in range(len(self.board_tiles[0])):
-                if self.board_tiles[row][col].get_type() == "player":
+                eval_against = self.board_tiles[row][col].get_type()
+                if eval_against == "player":
                     self.alteration_down = row
                     self.alteration_right = col
                     self.board_tiles[row][col] = tile.Tile("floor")
+                elif eval_against == "enemy":
+                    self.enemy_location = (row, col) # y, x
+                    self.altered_enemy_location = (row, col)
+        
 
     def draw(self):
         if self.lost:
@@ -190,6 +205,22 @@ class Main:
                     lose_sound.set_volume(0.3)
                     lose_sound.play()
                     self.sound_played = True
+            
+            # enemy movement
+            if math.floor((self.time)//1000) > self.prev_time:
+                self.prev_time = math.floor((self.time//1000))
+                if self.altered_enemy_location == self.enemy_location:
+                    el_y = self.enemy_location[0]
+                    el_x = self.enemy_location[1]
+                    self.board_tiles[el_y][el_x] = tile.Tile("floor")
+                    self.board_tiles[el_y+1][el_x] = tile.Tile("enemy")
+                    self.enemy_location = (el_y+1, el_x)
+                elif self.altered_enemy_location != self.enemy_location:
+                    el_y = self.enemy_location[0]
+                    el_x = self.enemy_location[1]
+                    self.board_tiles[el_y][el_x] = tile.Tile("floor")
+                    self.board_tiles[el_y-1][el_x] = tile.Tile("enemy")
+                    self.enemy_location = (el_y-1, el_x)
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -232,12 +263,32 @@ class Main:
                                 self.lost = True
                                 print("You are not Jesus. Next time, don't try to walk on water without Flippers. Game over.")
                             elif check_against == "info":
-                                print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                if self.filename == "level_one":
+                                    print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                elif self.filename == "level_two":
+                                    print("welcome to level 2.")                                
                                 self.alteration_down -= 1
                             elif check_against == "pad":
                                 if self.amt_chips == 4:
                                     self.alteration_down -= 1
                                     self.won = True
+                            elif check_against == "enemy":
+                                self.lost = True
+                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "dirt":
+                                check_against_against = self.board_tiles[self.alteration_down-2][self.alteration_right].get_type()
+                                if check_against_against == "water":
+                                    self.board_tiles[self.alteration_down-2][self.alteration_right] = tile.Tile("wdirt")
+                                    self.board_tiles[self.alteration_down-1][self.alteration_right] = tile.Tile("floor")
+                                    self.alteration_down -= 1
+                                elif check_against_against == "floor":
+                                    self.board_tiles[self.alteration_down-2][self.alteration_right] = tile.Tile("dirt")
+                                    self.board_tiles[self.alteration_down-1][self.alteration_right] = tile.Tile("floor")
+                                    self.alteration_down -= 1
+                                elif check_against_against == "enemy":
+                                    print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
+                                elif check_against_against == "solid":
+                                    break
                             else:
                                 self.alteration_down -= 1
                         else:
@@ -279,12 +330,32 @@ class Main:
                                 self.lost = True
                                 print("You are not Jesus. Next time, don't try to walk on water without Flippers. Game over.")
                             elif check_against == "info":
-                                print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                if self.filename == "level_one":
+                                    print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                elif self.filename == "level_two":
+                                    print("welcome to level 2.")                                
                                 self.alteration_down += 1
                             elif check_against == "pad":
                                 if self.amt_chips == 4:
                                     self.alteration_down += 1
                                     self.won = True
+                            elif check_against == "enemy":
+                                self.lost = True
+                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "dirt":
+                                check_against_against = self.board_tiles[self.alteration_down+2][self.alteration_right].get_type()
+                                if check_against_against == "water":
+                                    self.board_tiles[self.alteration_down+2][self.alteration_right] = tile.Tile("wdirt")
+                                    self.board_tiles[self.alteration_down+1][self.alteration_right] = tile.Tile("floor")
+                                    self.alteration_down += 1
+                                elif check_against_against == "floor":
+                                    self.board_tiles[self.alteration_down+2][self.alteration_right] = tile.Tile("dirt")
+                                    self.board_tiles[self.alteration_down+1][self.alteration_right] = tile.Tile("floor")
+                                    self.alteration_down += 1
+                                elif check_against_against == "enemy":
+                                    print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
+                                elif check_against_against == "solid":
+                                    break
                             else:
                                 self.alteration_down += 1
                         else:
@@ -320,13 +391,16 @@ class Main:
                                     if "red_k" in row:
                                         row[row.index("red_k")] = "floor"
                                         self.alteration_right -= 1
-                                        self.board_tiles[self.alteration_down][self.alteration_right-1] = tile.Tile("floor")
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
                                         break
                             elif check_against == "water" and not (any("wboot" in row for row in self.inventory)):
                                 self.lost = True
                                 print("You are not Jesus. Next time, don't try to walk on water without Flippers. Game over.")
                             elif check_against == "info":
-                                print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                if self.filename == "level_one":
+                                    print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                elif self.filename == "level_two":
+                                    print("welcome to level 2.")
                                 self.alteration_right -= 1
                             elif check_against == "acc_le":
                                 self.alteration_right -= 2
@@ -337,6 +411,23 @@ class Main:
                                 if self.amt_chips == 4:
                                     self.alteration_right -= 1
                                     self.won = True
+                            elif check_against == "enemy":
+                                self.lost = True
+                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "dirt":
+                                check_against_against = self.board_tiles[self.alteration_down][self.alteration_right-2].get_type()
+                                if check_against_against == "water":
+                                    self.board_tiles[self.alteration_down][self.alteration_right-2] = tile.Tile("wdirt")
+                                    self.board_tiles[self.alteration_down][self.alteration_right-1] = tile.Tile("floor")
+                                    self.alteration_right -= 1
+                                elif check_against_against == "floor":
+                                    self.board_tiles[self.alteration_down][self.alteration_right-2] = tile.Tile("dirt")
+                                    self.board_tiles[self.alteration_down][self.alteration_right-1] = tile.Tile("floor")
+                                    self.alteration_right -= 1
+                                elif check_against_against == "enemy":
+                                    print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
+                                elif check_against_against == "solid":
+                                    break
                             else:
                                 self.alteration_right -= 1
                         else:
@@ -378,7 +469,10 @@ class Main:
                                 self.lost = True
                                 print("You are not Jesus. Next time, don't try to walk on water. Game over.")
                             elif check_against == "info":
-                                print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                if self.filename == "level_one":
+                                    print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
+                                elif self.filename == "level_two":
+                                    print("welcome to level 2.")
                                 self.alteration_right += 1
                             elif check_against == "acc_le":
                                 break
@@ -389,6 +483,23 @@ class Main:
                                 if self.amt_chips == 4:
                                     self.alteration_right += 1
                                     self.won = True
+                            elif check_against == "enemy":
+                                self.lost = True
+                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "dirt":
+                                check_against_against = self.board_tiles[self.alteration_down][self.alteration_right+2].get_type()
+                                if check_against_against == "water":
+                                    self.board_tiles[self.alteration_down][self.alteration_right+2] = tile.Tile("wdirt")
+                                    self.board_tiles[self.alteration_down][self.alteration_right+1] = tile.Tile("floor")
+                                    self.alteration_right += 1
+                                elif check_against_against == "floor":
+                                    self.board_tiles[self.alteration_down][self.alteration_right+2] = tile.Tile("dirt")
+                                    self.board_tiles[self.alteration_down][self.alteration_right+1] = tile.Tile("floor")
+                                    self.alteration_right += 1
+                                elif check_against_against == "enemy":
+                                    print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
+                                elif check_against_against == "solid":
+                                    break
                             else:
                                 self.alteration_right += 1
                         else:
@@ -396,6 +507,6 @@ class Main:
             self.draw()
 
 if __name__ == "__main__":
-    Game = Main("CC")
+    Game = Main("level_two")
     Game.run()
     pg.quit()

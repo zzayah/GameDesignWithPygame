@@ -1,0 +1,2 @@
+- For enemies, be sure that their placement doesn't interfere, or will not be interfered by other game elements
+-> When placing them in the txt file, the requirement is that they have a free space under them to which they can move

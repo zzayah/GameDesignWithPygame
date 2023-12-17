@@ -14,6 +14,8 @@ class Tile:
             "info": False,
             "water": False,
             "pad": False,
+            "enemy": False,
+            "dirt": False,
             "fire": False,
             "acc_ri": False,
             "acc_le": False,

@@ -7,8 +7,8 @@ floor floor floor floor floor floor floor floor solid water solid floor floor fl
 floor floor floor floor floor floor floor floor solid water solid floor floor floor floor floor floor floor floor
 floor floor floor floor floor floor floor solid solid water solid solid floor floor floor floor floor floor floor
 floor solid solid solid solid solid solid floor floor floor floor floor solid solid solid solid solid solid floor
-solid chip floor floor floor floor floor floor floor player floor floor acc_ri floor acc_ri floor floor chip solid
-solid wboot floor floor floor floor floor floor floor info floor floor acc_le floor acc_le floor floor red_k solid
+solid chip floor water floor floor floor floor floor player floor floor acc_ri floor acc_ri floor floor chip solid
+solid wboot floor floor floor water floor floor floor info floor floor acc_le floor acc_le floor floor red_k solid
 floor solid solid solid solid solid solid floor floor floor floor floor solid solid solid solid solid solid floor
 floor floor floor floor floor floor floor solid solid red_d solid solid floor floor floor floor floor floor floor
 floor floor floor floor floor floor floor floor solid floor solid floor floor floor floor floor floor floor floor

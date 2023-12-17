@@ -16,6 +16,8 @@ class Main:
         self.lost = False
         self.won = False
 
+        self.amt_chips = 0
+
         self.sound_played = False
 
         self.alteration_right = 4
@@ -34,7 +36,8 @@ class Main:
             "acc_le": (32, 128, 32, 32),
             "red_k": (192, 160, 32, 32),
             "red_d": (32, 224, 32, 32),
-            "info": (64, 480, 32, 32)
+            "info": (64, 480, 32, 32),
+            "pad": (96, 320, 32, 32)
         }
 
         self.time = None
@@ -98,14 +101,14 @@ class Main:
                 chip_rect.center = (686, 200)
                 self.screen.blit(chip_count_txt, chip_rect)
 
-            amt_chips = 0
+            self.amt_chips = 0
             for row in range(2):
                 for col in range(4):
                     if self.inventory[row][col] == "chip":
-                        amt_chips += 1
+                        self.amt_chips += 1
             
             font = pg.font.Font(None, 50)
-            chip_ct_txt = font.render(f"{amt_chips}", True, (0, 0, 0))
+            chip_ct_txt = font.render(f"{self.amt_chips}", True, (0, 0, 0))
             chip_ct_rect = chip_ct_txt.get_rect()
             chip_ct_rect.center = (686, 250)
             chip_ct_white_rec = pg.Surface((50, 50))
@@ -177,6 +180,7 @@ class Main:
                     win_sound = pg.mixer.Sound("win.mp3")
                     win_sound.set_volume(.3)
                     win_sound.play()
+                    self.sound_played = True
 
             if 60-(self.time//1000) < 0 or self.lost and not self.won:
                 self.lost = True
@@ -230,6 +234,10 @@ class Main:
                             elif check_against == "info":
                                 print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
                                 self.alteration_down -= 1
+                            elif check_against == "pad":
+                                if self.amt_chips == 4:
+                                    self.alteration_down -= 1
+                                    self.won = True
                             else:
                                 self.alteration_down -= 1
                         else:
@@ -273,6 +281,10 @@ class Main:
                             elif check_against == "info":
                                 print("Level 1: Obtain the 4 chips located around the map by gathering the Red Key and Flippers and traversing through movement tiles.")
                                 self.alteration_down += 1
+                            elif check_against == "pad":
+                                if self.amt_chips == 4:
+                                    self.alteration_down += 1
+                                    self.won = True
                             else:
                                 self.alteration_down += 1
                         else:
@@ -321,6 +333,10 @@ class Main:
                                 break
                             elif check_against == "acc_ri":
                                 break
+                            elif check_against == "pad":
+                                if self.amt_chips == 4:
+                                    self.alteration_right -= 1
+                                    self.won = True
                             else:
                                 self.alteration_right -= 1
                         else:
@@ -369,6 +385,10 @@ class Main:
                             elif check_against == "acc_ri":
                                 self.alteration_right += 2
                                 break
+                            elif check_against == "pad":
+                                if self.amt_chips == 4:
+                                    self.alteration_right += 1
+                                    self.won = True
                             else:
                                 self.alteration_right += 1
                         else:

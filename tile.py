@@ -13,6 +13,7 @@ class Tile:
             "red_d": False,
             "info": False,
             "water": False,
+            "pad": False,
             "fire": False,
             "acc_ri": False,
             "acc_le": False,

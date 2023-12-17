@@ -16,8 +16,13 @@ class Tile:
             "pad": False,
             "enemy": False,
             "dirt": False,
+            "g_butt": False,
+            "gc_flo": False,
+            "gc_sol": False,
             "fire": False,
             "acc_ri": False,
+            "stain": False,
+            "gboot": False,
             "acc_le": False,
             "accelerate_down": False,
             "accelerate_up": False

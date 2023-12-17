@@ -30,6 +30,9 @@ class Main:
         self.altered_enemy_location = None
         self.enemy_location = None
 
+        # Green Checkered and Button
+        self.gc_location = None
+
         self.inventory = [["floor" for _ in range(4)] for _ in range(2)]
 
         self.sprite_sheet_pos = {
@@ -47,7 +50,15 @@ class Main:
             "pad": (96, 320, 32, 32),
             "enemy": (192, 0, 32, 32),
             "dirt": (32, 0, 32, 32),
-            "wdirt": (32, 448, 32, 32)
+            "wdirt": (32, 448, 32, 32),
+            "g_butt": (64, 96, 32, 32),
+            "gc_flo": (64, 192, 32, 32),
+            "gc_sol": (64, 160, 32, 32),
+            "bara": (64, 64, 32, 32),
+            "bara_b": (64, 320, 32, 32),
+            "fire": (0, 128, 32, 32),
+            "gboot": (192, 352, 32, 32),
+            "stain": (160, 384, 32, 32)
         }
 
         self.time = None
@@ -81,6 +92,8 @@ class Main:
                 elif eval_against == "enemy":
                     self.enemy_location = (row, col) # y, x
                     self.altered_enemy_location = (row, col)
+                elif eval_against == "gc_sol":
+                    self.gc_location = (row, col) # y, x
         
 
     def draw(self):
@@ -272,9 +285,32 @@ class Main:
                                 if self.amt_chips == 4:
                                     self.alteration_down -= 1
                                     self.won = True
-                            elif check_against == "enemy":
+                            elif check_against == "enemy" or check_against == "fire":
                                 self.lost = True
-                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "stain":
+                                has_boots = False
+                                for row in self.inventory:
+                                    if "gboot" in row:
+                                        has_boots = True
+                                        self.alteration_down -= 2
+                                        break
+                                if not has_boots:
+                                    self.lost = True
+                            elif check_against == "gboot":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "gboot"
+                                        self.alteration_down -= 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "gc_sol":
+                                break
+                            elif check_against == "g_butt":
+                                if self.board_tiles[self.gc_location[0]][self.gc_location[1]].get_type() == "gc_sol":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_flo")
+                                elif self.board_tiles[self.gc_location[0]][self.gc_location[1]] == "gc_flo":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_sol")
+                                self.alteration_down -= 1
                             elif check_against == "dirt":
                                 check_against_against = self.board_tiles[self.alteration_down-2][self.alteration_right].get_type()
                                 if check_against_against == "water":
@@ -289,6 +325,20 @@ class Main:
                                     print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
                                 elif check_against_against == "solid":
                                     break
+                            elif check_against == "bara_b":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "bara_b"
+                                        self.alteration_down -= 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "bara":
+                                for row in self.inventory:
+                                    if "bara_b" in row:
+                                        row[row.index("bara_b")] = "floor"
+                                        self.alteration_down -= 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
                             else:
                                 self.alteration_down -= 1
                         else:
@@ -339,9 +389,32 @@ class Main:
                                 if self.amt_chips == 4:
                                     self.alteration_down += 1
                                     self.won = True
-                            elif check_against == "enemy":
+                            elif check_against == "enemy" or check_against == "fire":
                                 self.lost = True
-                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "stain":
+                                has_boots = False
+                                for row in self.inventory:
+                                    if "gboot" in row:
+                                        has_boots = True
+                                        self.alteration_down += 2
+                                        break
+                                if not has_boots:
+                                    self.lost = True
+                            elif check_against == "gboot":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "gboot"
+                                        self.alteration_down += 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "gc_sol":
+                                break
+                            elif check_against == "g_butt":
+                                if self.board_tiles[self.gc_location[0]][self.gc_location[1]].get_type() == "gc_sol":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_flo")
+                                elif self.board_tiles[self.gc_location[0]][self.gc_location[1]] == "gc_flo":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_sol")
+                                self.alteration_down += 1
                             elif check_against == "dirt":
                                 check_against_against = self.board_tiles[self.alteration_down+2][self.alteration_right].get_type()
                                 if check_against_against == "water":
@@ -356,6 +429,20 @@ class Main:
                                     print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
                                 elif check_against_against == "solid":
                                     break
+                            elif check_against == "bara_b":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "bara_b"
+                                        self.alteration_down += 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "bara":
+                                for row in self.inventory:
+                                    if "bara_b" in row:
+                                        row[row.index("bara_b")] = "floor"
+                                        self.alteration_down += 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
                             else:
                                 self.alteration_down += 1
                         else:
@@ -411,9 +498,32 @@ class Main:
                                 if self.amt_chips == 4:
                                     self.alteration_right -= 1
                                     self.won = True
-                            elif check_against == "enemy":
+                            elif check_against == "enemy" or check_against == "fire":
                                 self.lost = True
-                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "stain":
+                                has_boots = False
+                                for row in self.inventory:
+                                    if "gboot" in row:
+                                        has_boots = True
+                                        self.alteration_right -= 2
+                                        break
+                                if not has_boots:
+                                    self.lost = True
+                            elif check_against == "gboot":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "gboot"
+                                        self.alteration_right -= 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "gc_sol":
+                                break
+                            elif check_against == "g_butt":
+                                if self.board_tiles[self.gc_location[0]][self.gc_location[1]].get_type() == "gc_sol":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_flo")
+                                elif self.board_tiles[self.gc_location[0]][self.gc_location[1]] == "gc_flo":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_sol")
+                                self.alteration_right -= 1
                             elif check_against == "dirt":
                                 check_against_against = self.board_tiles[self.alteration_down][self.alteration_right-2].get_type()
                                 if check_against_against == "water":
@@ -428,6 +538,20 @@ class Main:
                                     print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
                                 elif check_against_against == "solid":
                                     break
+                            elif check_against == "bara_b":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "bara_b"
+                                        self.alteration_right -= 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "bara":
+                                for row in self.inventory:
+                                    if "bara_b" in row:
+                                        row[row.index("bara_b")] = "floor"
+                                        self.board_tiles[self.alteration_down][self.alteration_right-1] = tile.Tile("floor")
+                                        self.alteration_right -= 1
+                                        break
                             else:
                                 self.alteration_right -= 1
                         else:
@@ -483,9 +607,32 @@ class Main:
                                 if self.amt_chips == 4:
                                     self.alteration_right += 1
                                     self.won = True
-                            elif check_against == "enemy":
+                            elif check_against == "enemy" or check_against == "fire":
                                 self.lost = True
-                                print("Don't hit the enemy! That's the entire point!")
+                            elif check_against == "stain":
+                                has_boots = False
+                                for row in self.inventory:
+                                    if "gboot" in row:
+                                        has_boots = True
+                                        self.alteration_right += 2
+                                        break
+                                if not has_boots:
+                                    self.lost = True
+                            elif check_against == "gboot":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "gboot"
+                                        self.alteration_right += 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "gc_sol":
+                                break
+                            elif check_against == "g_butt":
+                                if self.board_tiles[self.gc_location[0]][self.gc_location[1]].get_type() == "gc_sol":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_flo")
+                                elif self.board_tiles[self.gc_location[0]][self.gc_location[1]] == "gc_flo":
+                                    self.board_tiles[self.gc_location[0]][self.gc_location[1]] = tile.Tile("gc_sol")
+                                self.alteration_right += 1
                             elif check_against == "dirt":
                                 check_against_against = self.board_tiles[self.alteration_down][self.alteration_right+2].get_type()
                                 if check_against_against == "water":
@@ -500,6 +647,20 @@ class Main:
                                     print("Congrats, you found a part of the code I thought wouldn't be necessary. How about you do what you're supposed to with the dirt?")
                                 elif check_against_against == "solid":
                                     break
+                            elif check_against == "bara_b":
+                                for row in self.inventory:
+                                    if "floor" in row:
+                                        row[row.index("floor")] = "bara_b"
+                                        self.alteration_right += 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
+                            elif check_against == "bara":
+                                for row in self.inventory:
+                                    if "bara_b" in row:
+                                        row[row.index("bara_b")] = "floor"
+                                        self.alteration_right += 1
+                                        self.board_tiles[self.alteration_down][self.alteration_right] = tile.Tile("floor")
+                                        break
                             else:
                                 self.alteration_right += 1
                         else:

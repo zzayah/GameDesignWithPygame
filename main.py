@@ -9,7 +9,7 @@ class Main:
         self.green2 = pg.image.load("green2.png")
         self.green1 = pg.image.load("green1.png")
 
-        self.board_size = (board_size)
+        self.board_size = (board_size, board_size)
 
         if not (10 < self.board_size[0] < 26):
             print("invalid board_size input")
@@ -22,7 +22,7 @@ class Main:
         counter = 0
         for i in range(0, self.board_size[1]):
             for j in range(0, self.board_size[0]):
-                if not (self.board_size[0] % 2 == 0 or self.baord_size[1] % 2 == 0):
+                if not (self.board_size[0] % 2 == 0 or self.board_size[1] % 2 == 0):
                     if not (counter % 2 != 0):
                         self.screen.blit(self.green2, ((j*64)+20, (i*64)+20))
                     else:
@@ -47,5 +47,5 @@ class Main:
             pg.display.flip()
         pg.quit()
 
-main = Main((14, 14))
+main = Main((13))
 main.run()

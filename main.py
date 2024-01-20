@@ -69,6 +69,9 @@ class Main:
     
     def run(self):
         pg.init()
+        # init clock
+        Clock = pg.time.Clock
+        time = None
         pg.display.set_caption("Snake")
         self.screen.fill((87, 138, 52))
         running = True
@@ -76,6 +79,7 @@ class Main:
             for event in pg.event.get():
                 if event == pg.QUIT or event == pg.K_ESCAPE:
                     running = False
+            
             self.do_periodic()
             pg.display.flip()
         pg.quit()

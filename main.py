@@ -7,12 +7,12 @@ class Main:
 
         self.snake_pos = [[0 for _ in range(board_size)] for _ in range(board_size)]
 
-        self.snake_pos[int(board_size/2)][1] = "right"
-        self.snake_pos[int(board_size/2)][2] = "right"
-        self.snake_pos[int(board_size/2)][3] = "right"
+        self.snake_pos[int(board_size/2)][1] = ((int(board_size/2), 1), "right")
+        self.snake_pos[int(board_size/2)][2] = ((int(board_size/2), 2), "right")
+        self.snake_pos[int(board_size/2)][3] = ((int(board_size/2), 3), "right")
 
         # snake head location
-        self.snake_head = (int(board_size/2), 3)
+        self.snake_head = ((int(board_size/2), 3), "right")
 
         # green2 and green1 init
         self.green2 = pg.image.load("green2.png")
@@ -29,6 +29,9 @@ class Main:
         # clock var
         self.old_time = 0
         self.new_time = 0
+        
+        # snake length
+        self.snake_length = 3
 
         # input direction
         self.input_direction = "right"
@@ -78,6 +81,19 @@ class Main:
                     self.screen.blit(self.red, ((j * 64 + 20), (i * 64 + 20)))
 
     def handle_input(self):
+        # move snake
+        if self.input_direction == "up" and self.snake_pos[self.snake_head[0]][self.snake_head[1] - 1] == 0:
+            self.snake_head = (self.snake_head[0], self.snake_head[1] - 1)
+            for i in range(self.snake_length):
+                for j in range(self.snake_length):
+                    if self.snake_pos[i][j] != 0:
+                        break
+        elif self.input_direction == "down" and self.snake_pos[self.snake_head[0]][self.snake_head[1] + 1] == 0:
+            self.snake_head = (self.snake_head[0], self.snake_head[1] + 1)
+        elif self.input_direction == "left" and self.snake_pos[self.snake_head[0] - 1][self.snake_head[1]] == 0:
+            self.snake_head = (self.snake_head[0] - 1, self.snake_head[1])
+        elif self.input_direction == "right" and self.snake_pos[self.snake_head[0] + 1][self.snake_head[1]] == 0:
+            self.snake_head = (self.snake_head[0] + 1, self.snake_head[1])
         return
 
     

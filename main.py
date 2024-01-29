@@ -87,6 +87,8 @@ class Main:
 
     def handle_input(self, event):
 
+        snake_parts_processed = 0
+
         if event:
         # move snake
             if self.input_direction == "up" and self.snake_pos[self.snake_head[0]][self.snake_head[1] - 1] == 0:
@@ -108,23 +110,23 @@ class Main:
                 for j in range(self.board_size[0]):
                     if self.snake_pos[i][j] != 0:
                         # all marker_ary cases
-                        if self.marker_ary[i][j] == "right" and self.snake_pos[i][j][1] != "left":
-                            self.snake_pos[i][j+1] = ((self.snake_pos[i][j][0][0] + 1, self.snake_pos[i][j][0][1]), "right")
-                            self.snake_pos[i][j] = 0
-                        elif self.marker_ary[i][j] == "left" and self.snake_pos[i][j][1] != "right":
-                            self.snake_pos[i][j-1] = ((self.snake_pos[i][j][0][0] - 1, self.snake_pos[i][j][0][1]), "left")
-                            self.snake_pos[i][j] = 0
-                        elif self.marker_ary[i][j] == "down" and self.snake_pos[i][j][1] != "up":
-                            self.snake_pos[i-1][j] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] + 1), "down")
-                            self.snake_pos[i][j] = 0
-                        elif self.marker_ary[i][j] == "up" and self.snake_pos[i][j][1] != "down":
-                            self.snake_pos[i+1][j] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] - 1), "up")
-                            self.snake_pos[i][j] = 0
-                        else:
-                            # all snake_pos cases
-                            if self.marker_ary[i][j] == "right" and self.snake_pos[i][j][1] != "left" and j+1 < len(self.snake_pos[i]):
+                        if not self.marker_ary[i][j] == "":
+                            if self.marker_ary[i][j] == "right" and self.snake_pos[i][j][1] != "left":
                                 self.snake_pos[i][j+1] = ((self.snake_pos[i][j][0][0] + 1, self.snake_pos[i][j][0][1]), "right")
                                 self.snake_pos[i][j] = 0
+                            elif self.marker_ary[i][j] == "left" and self.snake_pos[i][j][1] != "right":
+                                self.snake_pos[i][j-1] = ((self.snake_pos[i][j][0][0] - 1, self.snake_pos[i][j][0][1]), "left")
+                                self.snake_pos[i][j] = 0
+                            elif self.marker_ary[i][j] == "down" and self.snake_pos[i][j][1] != "up":
+                                self.snake_pos[i-1][j] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] + 1), "down")
+                                self.snake_pos[i][j] = 0
+                            elif self.marker_ary[i][j] == "up" and self.snake_pos[i][j][1] != "down":
+                                self.snake_pos[i+1][j] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] - 1), "up")
+                                self.snake_pos[i][j] = 0
+                        else:
+                            # all snake_pos cases
+                            if self.snake_pos[i][j][1] == "right":
+                                break                                    
                             elif self.snake_pos[i][j][1] == "left":
                                 self.snake_pos[i][j-1] = ((self.snake_pos[i][j][0][0] - 1, self.snake_pos[i][j][0][1]), "left")
                                 self.snake_pos[i][j] = 0
@@ -160,13 +162,14 @@ class Main:
 
             self.new_time = pg.time.get_ticks()
 
-            if self.new_time - 500 > self.old_time and event_occured == True:
+            if self.new_time - 1000 > self.old_time and event_occured == True:
                 # abstract to function
                 self.handle_input(True)
                 # restart counter
                 self.old_time = self.new_time
-            elif self.new_time - 500 > self.old_time:
+            elif self.new_time - 1000 > self.old_time:
                 self.handle_input(False)
+                self.old_time = self.new_time
 
             self.do_periodic()
             pg.display.flip()

@@ -4,6 +4,7 @@ class Main:
     def __init__(self, board_size):
         # board_size must be a tuple, representing the width (x) then height (y) of the board
         self.filename = "snake_sprites.png"
+        self.snake_parts_processed = 0
 
         self.snake_pos = [[0 for _ in range(board_size)] for _ in range(board_size)]
         self.marker_ary = [["" for _ in range(board_size)] for _ in range(board_size)]
@@ -87,8 +88,6 @@ class Main:
 
     def handle_input(self, event):
 
-        snake_parts_processed = 0
-
         if event:
         # move snake
             if self.input_direction == "up" and self.snake_pos[self.snake_head[0]][self.snake_head[1] - 1] == 0:
@@ -126,7 +125,27 @@ class Main:
                         else:
                             # all snake_pos cases
                             if self.snake_pos[i][j][1] == "right":
-                                break                                    
+                                if j+1 < len(self.snake_pos) and self.snake_parts_processed < self.snake_length:
+                                    self.snake_pos[i][j+1] = ((self.snake_pos[i][j][0][0] + 1, self.snake_pos[i][j][0][1]), "right")
+                                    self.snake_parts_processed += 1
+                                    if self.snake_pos[i][j-1] == 0:
+                                        self.snake_pos[i][j] = 0
+                                    elif self.snake_pos[i][j-1] == "right":
+                                        self.snake_pos[i][j] = self.snake_pos[i][j-1]
+                                        self.snake_pos[i][j-1] = 0
+                                    elif self.snake_pos[i+1][j] == "down":
+                                        self.snake_pos[i][j] = self.snake_pos[i+1][j]
+                                        self.snake_pos[i+1][j] = 0
+                                    elif self.snake_pos[i-1][j] == "up":
+                                        self.snake_pos[i][j] = self.snake_pos[i-1][j]
+                                        self.snake_pos[i-1][j] = 0
+                                    elif self.snake_pos[i][j-1] == "left":
+                                        print("left case")
+                                elif self.snake_parts_processed == self.snake_length:
+                                    self.snake_parts_processed = 0
+                                    break
+                                elif j+1 == len(self.snake_pos):
+                                    self.lost = True                             
                             elif self.snake_pos[i][j][1] == "left":
                                 self.snake_pos[i][j-1] = ((self.snake_pos[i][j][0][0] - 1, self.snake_pos[i][j][0][1]), "left")
                                 self.snake_pos[i][j] = 0
@@ -144,6 +163,8 @@ class Main:
         running = True
         while running:
             event_occured = False
+            if self.lost == True:
+                print('lost')
             for event in pg.event.get():
                 if event == pg.QUIT or event == pg.K_ESCAPE:
                     running = False

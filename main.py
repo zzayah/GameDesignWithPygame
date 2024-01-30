@@ -88,73 +88,40 @@ class Main:
 
     def handle_input(self, event):
 
+        new_ary = [[0 for _ in range(self.board_size[0])] for _ in range(self.board_size[1])]
+
         if event:
-        # move snake
-            if self.input_direction == "up" and self.snake_pos[self.snake_head[0]][self.snake_head[1] - 1] == 0:
-                self.snake_head = (self.snake_head[0], self.snake_head[1] - 1)
-                # update marker ary
-                self.marker_ary[self.snake_head[0]][self.snake_head[1]] = "up"
-            elif self.input_direction == "down" and self.snake_pos[self.snake_head[0]][self.snake_head[1] + 1] == 0:
-                self.snake_head = (self.snake_head[0], self.snake_head[1] + 1)
-            elif self.input_direction == "left" and self.snake_pos[self.snake_head[0] - 1][self.snake_head[1]] == 0:
-                self.snake_head = (self.snake_head[0] - 1, self.snake_head[1])
-            elif self.input_direction == "right" and self.snake_pos[self.snake_head[0] + 1][self.snake_head[1]] == 0:
-                self.snake_head = (self.snake_head[0] + 1, self.snake_head[1])
-            else:
-                self.lost = True
-            return
-        else:
-            # move all parts of the snake
             for i in range(self.board_size[1]):
                 for j in range(self.board_size[0]):
                     if self.snake_pos[i][j] != 0:
-                        # all marker_ary cases
-                        if not self.marker_ary[i][j] == "":
-                            if self.marker_ary[i][j] == "right" and self.snake_pos[i][j][1] != "left":
-                                self.snake_pos[i][j+1] = ((self.snake_pos[i][j][0][0] + 1, self.snake_pos[i][j][0][1]), "right")
-                                self.snake_pos[i][j] = 0
-                            elif self.marker_ary[i][j] == "left" and self.snake_pos[i][j][1] != "right":
-                                self.snake_pos[i][j-1] = ((self.snake_pos[i][j][0][0] - 1, self.snake_pos[i][j][0][1]), "left")
-                                self.snake_pos[i][j] = 0
-                            elif self.marker_ary[i][j] == "down" and self.snake_pos[i][j][1] != "up":
-                                self.snake_pos[i-1][j] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] + 1), "down")
-                                self.snake_pos[i][j] = 0
-                            elif self.marker_ary[i][j] == "up" and self.snake_pos[i][j][1] != "down":
-                                self.snake_pos[i+1][j] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] - 1), "up")
-                                self.snake_pos[i][j] = 0
-                        else:
-                            # all snake_pos cases
-                            if self.snake_pos[i][j][1] == "right":
-                                if j+1 < len(self.snake_pos) and self.snake_parts_processed < self.snake_length:
-                                    self.snake_pos[i][j+1] = ((self.snake_pos[i][j][0][0] + 1, self.snake_pos[i][j][0][1]), "right")
-                                    self.snake_parts_processed += 1
-                                    if self.snake_pos[i][j-1] == 0:
-                                        self.snake_pos[i][j] = 0
-                                    elif self.snake_pos[i][j-1] == "right":
-                                        self.snake_pos[i][j] = self.snake_pos[i][j-1]
-                                        self.snake_pos[i][j-1] = 0
-                                    elif self.snake_pos[i+1][j] == "down":
-                                        self.snake_pos[i][j] = self.snake_pos[i+1][j]
-                                        self.snake_pos[i+1][j] = 0
-                                    elif self.snake_pos[i-1][j] == "up":
-                                        self.snake_pos[i][j] = self.snake_pos[i-1][j]
-                                        self.snake_pos[i-1][j] = 0
-                                    elif self.snake_pos[i][j-1] == "left":
-                                        print("left case")
-                                elif self.snake_parts_processed == self.snake_length:
-                                    self.snake_parts_processed = 0
-                                    break
-                                elif j+1 == len(self.snake_pos):
-                                    self.lost = True                             
-                            elif self.snake_pos[i][j][1] == "left":
-                                self.snake_pos[i][j-1] = ((self.snake_pos[i][j][0][0] - 1, self.snake_pos[i][j][0][1]), "left")
-                                self.snake_pos[i][j] = 0
-                            elif self.snake_pos[i][j][1] == "down":
-                                self.snake_pos[i][j-1] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] + 1), "down")
-                                self.snake_pos[i][j] = 0
-                            elif self.snake_pos[i][j][0] == "up":
-                                self.snake_pos[i][j+1] = ((self.snake_pos[i][j][0][0], self.snake_pos[i][j][0][1] - 1), "up")
-                                self.snake_pos[i][j] = 0
+                        if self.snake_pos[i][j][1] == "right":
+                            if self.marker_ary == "up":
+                                self.snake_pos[i][j][1] = "up"
+                                new_ary[i][j+1] = self.snake_pos[i][j]
+                            elif self.marker_ary == "down":
+                                self.snake_pos[i][j][1] = "down"
+                                new_ary[i][j-1] = self.snake_pos[i][j]
+
+                        elif self.snake_pos[i][j][1] == "left":
+                            new_ary[i][j-1] = self.snake_pos[i][j]
+                        elif self.snake_pos[i][j][1] == "up":
+                            new_ary[i-1][j] = self.snake_pos[i][j]
+                        elif self.snake_pos[i][j][1] == "down":
+                            new_ary[i+1][j] = self.snake_pos[i][j]
+            self.snake_pos = new_ary
+        else:
+            for i in range(self.board_size[1]):
+                for j in range(self.board_size[0]):
+                    if self.snake_pos[i][j] != 0:
+                        if self.snake_pos[i][j][1] == "right":
+                            new_ary[i][j+1] = self.snake_pos[i][j]
+                        elif self.snake_pos[i][j][1] == "left":
+                            new_ary[i][j-1] = self.snake_pos[i][j]
+                        elif self.snake_pos[i][j][1] == "up":
+                            new_ary[i-1][j] = self.snake_pos[i][j]
+                        elif self.snake_pos[i][j][1] == "down":
+                            new_ary[i+1][j] = self.snake_pos[i][j]
+            self.snake_pos = new_ary
 
     def run(self):
         pg.init()
@@ -166,24 +133,34 @@ class Main:
             if self.lost == True:
                 print('lost')
             for event in pg.event.get():
-                if event == pg.QUIT or event == pg.K_ESCAPE:
+                if event.type == pg.QUIT:
                     running = False
-                elif event == pg.K_UP:
-                    self.input_direction = "up"
-                    event_occured = True
-                elif event == pg.K_DOWN:
-                    self.input_direction = "down"
-                    event_occured = True
-                elif event == pg.K_LEFT:
-                    self.input_direction = "left"
-                    event_occured = True
-                elif event == pg.K_RIGHT:
-                    self.input_direction = "right"
-                    event_occured = True
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_UP:
+                        self.input_direction = "up"
+                        event_occured = True
+                    elif event.key == pg.K_DOWN:
+                        self.input_direction = "down"
+                        event_occured = True
+                    elif event.key == pg.K_LEFT:
+                        self.input_direction = "left"
+                        event_occured = True
+                    elif event.key == pg.K_RIGHT:
+                        self.input_direction = "right"
+                        event_occured = True
 
             self.new_time = pg.time.get_ticks()
 
             if self.new_time - 1000 > self.old_time and event_occured == True:
+                if self.input_direction == "up":
+                    self.snake_head = ((self.snake_head[0][0] + 1, self.snake_head[0][1]), "up")
+                elif self.input_direction == "down":
+                    self.snake_head = ((self.snake_head[0][0] - 1, self.snake_head[0][1]), "down")
+                elif self.input_direction == "left":
+                    self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] - 1), "left")
+                elif self.input_direction == "right":
+                    self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] + 1), "right")
+                self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]] = self.snake_head
                 # abstract to function
                 self.handle_input(True)
                 # restart counter

@@ -1,4 +1,6 @@
 import pygame as pg
+import random
+
 
 class Main:
     def __init__(self, board_size):
@@ -35,6 +37,9 @@ class Main:
         # lost/win var
         self.lost = False
         self.won = False
+
+        # fruit
+        self.fruit_location = (int(2*board_size/3), int(board_size/2))
 
         # snake length
         self.snake_length = 3
@@ -89,6 +94,9 @@ class Main:
             for j in range(self.board_size[0]):
                 if self.snake_pos[i][j] != 0:
                     self.screen.blit(self.red, ((j * 64 + 20), (i * 64 + 20)))
+        
+        self.screen.blit(self.gold, ((self.fruit_location[0] * 64 + 20), (self.fruit_location[1] * 64 + 20)))
+
 
     def do_periodic(self):
         # Blit tiles in checkerboard pattern
@@ -113,11 +121,8 @@ class Main:
             for r in range(self.board_size[0]):
                 # Check if there's a snake part at this position
                 if self.snake_pos[r][d] != 0:
-                    pos, current_direction = self.snake_pos[r][d]
-                    print(self.snake_head, self.marker_ary[pos[0]][pos[1]])
-                    
+                    pos, current_direction = self.snake_pos[r][d]                    
                     new_direction = self.marker_ary[pos[0]][pos[1]]
-                    
                     # Update direction based on the marker
                     if new_direction == "left" and current_direction != "right":
                         current_direction = "left"
@@ -147,10 +152,16 @@ class Main:
         self.snake_pos = new_ary
 
 
-
-        
     def place_fruit(self):
-        pass
+        if self.fruit_location is None:
+            while True:
+                i = random.randint(3, self.board_size[1] - 4)
+                j = random.randint(3, self.board_size[0] - 4)
+                if self.snake_pos[i][j] == 0 and self.marker_ary[i][j] == "":
+                    self.fruit_location = (i, j)
+                    break
+        if self.fruit_location is not None:
+            self.screen.blit(self.gold, ((self.fruit_location[0] * 64 + 20), (self.fruit_location[1] * 64 + 20)))
 
     def run(self):
         pg.init()
@@ -165,7 +176,7 @@ class Main:
 
             self.new_time = pg.time.get_ticks()
 
-            self.event_occured = self.new_time - 750 > self.old_time
+            self.event_occured = self.new_time - 250 > self.old_time
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -181,6 +192,11 @@ class Main:
                         self.input_direction = "right"
 
             if self.event_occured and not self.lost and not self.won:
+                #check if lost
+                if self.snake_head[0][0] < 0 or self.snake_head[0][0] >= self.board_size[1] or self.snake_head[0][1] < 0 or self.snake_head[0][1] >= self.board_size[0]:
+                    print(self.lost)
+                    self.lost = True
+                print(self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]-1] == 0)
                 if self.input_direction == "left" and self.snake_head[1] != "right":
                     self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] - 1), "left")
                     self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]+1] = self.snake_head[1]
@@ -191,10 +207,30 @@ class Main:
                     self.snake_head = ((self.snake_head[0][0] - 1, self.snake_head[0][1]), "up")
                     self.marker_ary[self.snake_head[0][0]+1][self.snake_head[0][1]] = self.snake_head[1]
                 elif self.input_direction == "down" and self.snake_head[1] != "up":
-                    self.snake_head = ((self.snake_head[0][0] + 1, self.snake_head[0][1]), "down")
+                    self.snake_head = ((self.snake_head[0][0] + 1, self.snake_head[0][1]), "down")                    
                     self.marker_ary[self.snake_head[0][0]-1][self.snake_head[0][1]] = self.snake_head[1]
 
-                
+                if self.fruit_location != None and self.snake_head[0] == (self.fruit_location[1], self.fruit_location[0]):
+                    match(self.snake_head[1]):
+                        case "right":
+                            self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]] = (self.snake_head[0], "right")
+                            self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] + 1), "right")
+                            self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]-1] = self.snake_head[1]
+                        case "left":
+                            self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]] = (self.snake_head[0], "left")
+                            self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] - 1), "left")
+                            self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]+1] = self.snake_head[1]
+                        case "up":
+                            self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]] = (self.snake_head[0], "up")
+                            # self.snakehead = ((self.snake_head[0][0] - 1, self.snake_head[0][1]), "up")
+                            self.marker_ary[self.snake_head[0][0]+1][self.snake_head[0][1]] = self.snake_head[1]
+                        case "down":
+                            self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]] = (self.snake_head[0], "down")
+                            self.snake_head = ((self.snake_head[0][0] + 1, self.snake_head[0][1]), "down")
+                            self.marker_ary[self.snake_head[0][0]-1][self.snake_head[0][1]] = self.snake_head[1]
+                    self.snake_length += 1
+                    self.fruit_location = None
+
                 # abstract to function
                 self.handle_input()
                 # restart counter
@@ -203,6 +239,7 @@ class Main:
                 self.startup_flip_executed = True
                 # self.debug()
                 self.do_periodic()
+                self.place_fruit()
                 pg.display.flip()
 
             if not self.startup_flip_executed:

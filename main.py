@@ -73,6 +73,8 @@ class Main:
         self.startup_flip_executed = False
         self.event_occured = False
 
+        self.check_fruit_iter = 0
+
         self.board_size = (board_size, board_size)
 
         if not (10 < self.board_size[0] < 26):
@@ -151,6 +153,26 @@ class Main:
 
         self.snake_pos = new_ary
 
+    def check_fruit(self):
+        # Flag to check if the fruit is inside the snake
+        fruit_inside_snake = False
+
+        # Iterate over the entire snake_pos array
+        for row in range(self.board_size[0]):
+            for col in range(self.board_size[1]):
+                # Check if the current cell is part of the snake
+                if self.snake_pos[row][col] != 0:
+                    # Check if the fruit is in the same position as this part of the snake
+                    if (col, row) == self.fruit_location:
+                        fruit_inside_snake = True
+                        break  # No need to check further if we've found the fruit inside the snake
+
+            if fruit_inside_snake:
+                break
+
+        # If the fruit is inside the snake, relocate it
+        if fruit_inside_snake:
+            self.place_fruit()  # This will find a new location for the fruit
 
     def place_fruit(self):
         if self.fruit_location is None:
@@ -171,6 +193,7 @@ class Main:
         self.init_set_board()
         while running:
             event_occured = False
+            self.check_fruit()
             if self.lost == True:
                 print('lost')
 
@@ -196,17 +219,24 @@ class Main:
                 if self.snake_head[0][0] < 0 or self.snake_head[0][0] >= self.board_size[1] or self.snake_head[0][1] < 0 or self.snake_head[0][1] >= self.board_size[0]:
                     print(self.lost)
                     self.lost = True
-                print(self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]-1] == 0)
                 if self.input_direction == "left" and self.snake_head[1] != "right":
+                    if self.snake_head[1] == "left" and self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]-1] != 0:
+                        self.lost = True
                     self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] - 1), "left")
                     self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]+1] = self.snake_head[1]
                 elif self.input_direction == "right" and self.snake_head[1] != "left":
+                    if self.snake_pos[1] == "right" and self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]+1] != 0:
+                        self.lost = True
                     self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] + 1), "right")
                     self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]-1] = self.snake_head[1]
                 elif self.input_direction == "up" and self.snake_head[1] != "down":
+                    if self.snake_head[1] == "up" and self.snake_pos[self.snake_head[0][0]-1][self.snake_head[0][1]] != 0:
+                        self.lost = True
                     self.snake_head = ((self.snake_head[0][0] - 1, self.snake_head[0][1]), "up")
                     self.marker_ary[self.snake_head[0][0]+1][self.snake_head[0][1]] = self.snake_head[1]
                 elif self.input_direction == "down" and self.snake_head[1] != "up":
+                    if self.snake_head[1] == "down" and self.snake_pos[self.snake_head[0][0]+1][self.snake_head[0][1]] != 0:
+                        self.lost = True
                     self.snake_head = ((self.snake_head[0][0] + 1, self.snake_head[0][1]), "down")                    
                     self.marker_ary[self.snake_head[0][0]-1][self.snake_head[0][1]] = self.snake_head[1]
 
@@ -222,7 +252,7 @@ class Main:
                             self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]+1] = self.snake_head[1]
                         case "up":
                             self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]] = (self.snake_head[0], "up")
-                            # self.snakehead = ((self.snake_head[0][0] - 1, self.snake_head[0][1]), "up")
+                            self.snake_head = ((self.snake_head[0][0] - 1, self.snake_head[0][1]), "up")
                             self.marker_ary[self.snake_head[0][0]+1][self.snake_head[0][1]] = self.snake_head[1]
                         case "down":
                             self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]] = (self.snake_head[0], "down")

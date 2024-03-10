@@ -424,5 +424,3 @@ class Main:
             
         pg.quit()
 
-main = Main((13))
-main.run()

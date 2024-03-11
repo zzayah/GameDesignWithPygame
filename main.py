@@ -38,6 +38,16 @@ class Main:
         # FRUIT
         self.fruit_location = (int(2*board_size[0]/3), int(board_size[1]/2))
 
+        # MULTIPLAYER ITEM
+        self.mult_location = None
+        self.lag = 500
+        self.mult_cooldown_starts_at = 0
+        self.mult_cooldown_wears_off_this_amt_of_seconds_after = 3000
+
+        self.have_mult = False
+        self.mult_collected_at = 0
+        self.mult_wears_off_this_amt_of_seconds_after = 3000
+
         # LOSE/WIN
         self.lost = False
         self.won = False
@@ -50,6 +60,7 @@ class Main:
         self.red = pg.image.load("red.png")
         self.blue = pg.image.load("blue.png")
         self.gold = pg.image.load("gold.png")
+        self.mult = pg.image.load("mult.png")
 
         # OPTIMIZATION AND BOOTUP
         self.startup_flip_executed = False
@@ -138,7 +149,7 @@ class Main:
                             break
 
                     if pos[0] < 0 or pos[0] >= self.board_size[1] or pos[1] < 0 or pos[1] >= self.board_size[0]:
-                        self.lost_message = "Player 1 hit the wall!"
+                        self.lost_message = "Player 1 (red) hit the wall!"
                         self.lost = True
                         return  # Exit the method to avoid further processing
 
@@ -177,7 +188,7 @@ class Main:
                             break
 
                     if pos[0] < 0 or pos[0] >= self.board_size[1] or pos[1] < 0 or pos[1] >= self.board_size[0]:
-                        self.lost_message = "Player 2 hit the wall!"
+                        self.lost_message = "Player 2 (blue) hit the wall!"
                         self.lost = True
                         return
 
@@ -205,6 +216,39 @@ class Main:
         # If the fruit is inside the snake, relocate it
         if fruit_inside_snake:
             self.place_fruit()  # This will find a new location for the fruit
+
+    def check_mult(self):
+        # Flag to check if the fruit is inside the snake
+        mult_inside_snake = False
+
+        # Iterate over the entire snake_pos array
+        for row in range(self.board_size[0]):
+            for col in range(self.board_size[1]):
+                # Check if the current cell is part of the snake
+                if self.snake_pos[row][col] != 0 and self.p2_snake_pos[row][col] != 0:
+                    # Check if the fruit is in the same position as this part of the snake
+                    if (col, row) == self.mult_location:
+                        mult_inside_snake = True
+                        break  # No need to check further if we've found the fruit inside the snake
+
+            if mult_inside_snake:
+                break
+
+        # If the fruit is inside the snake, relocate it
+        if mult_inside_snake:
+            self.place_mult()  # This will find a new location for the fruit
+
+    def place_mult(self):
+        if self.mult_location is None:
+            while True:
+                i = random.randint(3, self.board_size[1] - 4)
+                j = random.randint(3, self.board_size[0] - 4)
+                if self.snake_pos[i][j] == 0 and self.marker_ary[i][j] == "" and self.p2_snake_pos[i][j] == 0 and self.p2_marker_ary[i][j] == "":
+                    self.mult_location = (i, j)
+                    break
+        if self.mult_location is not None:
+            self.screen.blit(self.mult, ((self.mult_location[0] * 64 + 20), (self.mult_location[1] * 64 + 20)))
+
 
     def place_fruit(self):
         if self.fruit_location is None:
@@ -259,12 +303,19 @@ class Main:
                 pg.display.flip()
             else:
                 self.check_fruit()
+                self.check_mult()
 
+                if self.have_mult:
+                    if (self.mult_collected_at + self.mult_wears_off_this_amt_of_seconds_after) < pg.time.get_ticks():
+                        self.lag += 250
+                        self.have_mult = False
+                        self.mult_cooldown_starts_at = pg.time.get_ticks()
+                
                 self.new_time = pg.time.get_ticks()
                 self.p2_new_time = pg.time.get_ticks()
 
-                self.event_occured = self.new_time - 500 > self.old_time
-                self.p2_event_occured = self.p2_new_time - 500 > self.p2_old_time
+                self.event_occured = self.new_time - self.lag > self.old_time
+                self.p2_event_occured = self.p2_new_time - self.lag > self.p2_old_time
 
                 for event in pg.event.get():
                     if event.type == pg.QUIT:
@@ -302,29 +353,29 @@ class Main:
                     # P1 HANDLE INPUT
                     if self.input_direction == "left" and self.snake_head[1] != "right":
                         if self.snake_head[1] == "left" and self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]-1] != 0:
-                            self.lost_message = "Player 1 hit themselves!"
+                            self.lost_message = "Player 1 (red) hit themselves!"
                             self.lost = True
                         self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] - 1), "left")
                         self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]+1] = self.snake_head[1]
                     elif self.input_direction == "right" and self.snake_head[1] != "left":
                         if self.snake_pos[1] == "right" and self.snake_pos[self.snake_head[0][0]][self.snake_head[0][1]+1] != 0:
-                            self.lost_message = "Player 1 hit themselves!"
+                            self.lost_message = "Player 1 (red) hit themselves!"
                             self.lost = True
                         self.snake_head = ((self.snake_head[0][0], self.snake_head[0][1] + 1), "right")
                         self.marker_ary[self.snake_head[0][0]][self.snake_head[0][1]-1] = self.snake_head[1]
                     elif self.input_direction == "up" and self.snake_head[1] != "down":
                         if self.snake_head[1] == "up" and self.snake_pos[self.snake_head[0][0]-1][self.snake_head[0][1]] != 0:
-                            self.lost_message = "Player 1 hit themselves!"
+                            self.lost_message = "Player 1 (red) hit themselves!"
                             self.lost = True
                         self.snake_head = ((self.snake_head[0][0] - 1, self.snake_head[0][1]), "up")
                         self.marker_ary[self.snake_head[0][0]+1][self.snake_head[0][1]] = self.snake_head[1]
                     elif self.input_direction == "down" and self.snake_head[1] != "up":
                         try:
                             if (self.snake_head[1] == "down" and self.snake_pos[self.snake_head[0][0]+1][self.snake_head[0][1]] != 0):
-                                self.lost_message = "Player 1 hit themselves!"
+                                self.lost_message = "Player 1 (red) hit themselves!"
                                 self.lost = True
                         except IndexError:
-                            self.lost_message = "Player 1 hit themselves!"
+                            self.lost_message = "Player 1 (red) hit themselves!"
                             self.lost = True
                         self.snake_head = ((self.snake_head[0][0] + 1, self.snake_head[0][1]), "down")                    
                         self.marker_ary[self.snake_head[0][0]-1][self.snake_head[0][1]] = self.snake_head[1]
@@ -349,13 +400,29 @@ class Main:
                                 self.marker_ary[self.snake_head[0][0]-1][self.snake_head[0][1]] = self.snake_head[1]
                         self.snake_length += 1
                         self.fruit_location = None
+
+                    if self.mult_location != None and self.snake_head[0] == (self.mult_location[1], self.mult_location[0]):
+                        self.lag -= 250
+                        self.mult_collected_at = pg.time.get_ticks()
+                        self.mult_location = None
+                        self.have_mult = True
+
                     self.handle_input()
                     self.old_time = self.new_time
+
+                    self.startup_flip_executed = True
+                    self.do_periodic()
+                    self.place_fruit()
+
+                    if self.mult_cooldown_starts_at + self.mult_cooldown_wears_off_this_amt_of_seconds_after < pg.time.get_ticks() and not self.have_mult:
+                        self.place_mult()
+                        self.mult_cooldown_active = 0
+                    pg.display.flip()
 
                 if self.p2_event_occured and not self.lost and not self.won:
                     # P2 CHECK IF LOST
                     if self.p2_snake_head[0][0] < 0 or self.p2_snake_head[0][0] >= self.board_size[1] or self.p2_snake_head[0][1] < 0 or self.p2_snake_head[0][1] >= self.board_size[0]:
-                        self.lost_message = "Player 2 hit the wall!"
+                        self.lost_message = "Player 2 (blue) hit the wall!"
                         self.lost = True
                     # P2 CHECK IF WON
                     if self.p2_snake_length == self.board_size[0] * self.board_size[1]:
@@ -363,30 +430,30 @@ class Main:
                     # P2 HANDLE INPUT
                     if self.p2_input_direction == "left" and self.p2_snake_head[1] != "right":
                         if self.p2_snake_head[1] == "left" and self.p2_snake_pos[self.p2_snake_head[0][0]][self.p2_snake_head[0][1]-1] != 0:
-                            self.lost_message = "Player 2 hit themselves!"
+                            self.lost_message = "Player 2 (blue) hit themselves!"
                             self.lost = True
                         self.p2_snake_head = ((self.p2_snake_head[0][0], self.p2_snake_head[0][1] - 1), "left")
                         self.p2_marker_ary[self.p2_snake_head[0][0]][self.p2_snake_head[0][1]+1] = self.p2_snake_head[1]
                     elif self.p2_input_direction == "right" and self.p2_snake_head[1] != "left":
                         
                         if self.p2_snake_pos[1] == "right" and self.p2_snake_pos[self.p2_snake_head[0][0]][self.p2_snake_head[0][1]+1] != 0:
-                            self.lost_message = "Player 2 hit themselves!"
+                            self.lost_message = "Player 2 (blue) hit themselves!"
                             self.lost = True
                         self.p2_snake_head = ((self.p2_snake_head[0][0], self.p2_snake_head[0][1] + 1), "right")
                         self.p2_marker_ary[self.p2_snake_head[0][0]][self.p2_snake_head[0][1]-1] = self.p2_snake_head[1]
                     elif self.p2_input_direction == "up" and self.p2_snake_head[1] != "down":
                         if self.p2_snake_head[1] == "up" and self.p2_snake_pos[self.p2_snake_head[0][0]-1][self.p2_snake_head[0][1]] != 0:
-                            self.lost_message = "Player 2 hit themselves!"
+                            self.lost_message = "Player 2 (blue) hit themselves!"
                             self.lost = True
                         self.p2_snake_head = ((self.p2_snake_head[0][0] - 1, self.p2_snake_head[0][1]), "up")
                         self.p2_marker_ary[self.p2_snake_head[0][0]+1][self.p2_snake_head[0][1]] = self.p2_snake_head[1]
                     elif self.p2_input_direction == "down" and self.p2_snake_head[1] != "up":
                         try:
                             if (self.p2_snake_head[1] == "down" and self.p2_snake_pos[self.p2_snake_head[0][0]+1][self.p2_snake_head[0][1]] != 0):
-                                self.lost_message = "Player 2 hit themselves!"
+                                self.lost_message = "Player 2 (blue) hit themselves!"
                                 self.lost = True
                         except IndexError:
-                            self.lost_message = "Player 2 hit themselves!"
+                            self.lost_message = "Player 2 (blue) hit themselves!"
                             self.lost = True
                         self.p2_snake_head = ((self.p2_snake_head[0][0] + 1, self.p2_snake_head[0][1]), "down")                    
                         self.p2_marker_ary[self.p2_snake_head[0][0]-1][self.p2_snake_head[0][1]] = self.p2_snake_head[1]
@@ -409,14 +476,25 @@ class Main:
                                 self.p2_snake_pos[self.p2_snake_head[0][0]][self.p2_snake_head[0][1]] = (self.p2_snake_head[0], "down")
                                 self.p2_snake_head = ((self.p2_snake_head[0][0] + 1, self.p2_snake_head[0][1]), "down")
                                 self.p2_marker_ary[self.p2_snake_head[0][0]-1][self.p2_snake_head[0][1]] = self.p2_snake_head[1]
-                        self.p2_snake_length += 1
+                        self.snake_length += 1
                         self.fruit_location = None
+
+                    if self.mult_location != None and self.p2_snake_head[0] == (self.mult_location[1], self.mult_location[0]):
+                        self.lag -= 250
+                        self.mult_collected_at = pg.time.get_ticks()
+                        self.mult_location = None
+                        self.have_mult = True
+
                     self.p2_handle_input()    
                     self.p2_old_time = self.p2_new_time            
                     
                     self.startup_flip_executed = True
                     self.do_periodic()
                     self.place_fruit()
+
+                    if self.mult_cooldown_starts_at + self.mult_cooldown_wears_off_this_amt_of_seconds_after < pg.time.get_ticks() and not self.have_mult:
+                        self.place_mult()
+                        self.mult_cooldown_active = 0
                     pg.display.flip()
 
                 if not self.startup_flip_executed:
@@ -424,3 +502,6 @@ class Main:
             
         pg.quit()
 
+
+main = Main((13))
+main.run()
